@@ -68,6 +68,7 @@
         /// Gets the Information, if a specific User has already applied for Workshops
         /// </summary>
         /// <param name="conference_id">ID of the conference to restrict the Search to</param>
+        /// <param name="jwttoken">User Token for Auth</param>
         /// <param name="apikey">API Key for Authentification</param>
         /// <param name="uid">ID of the User to get the Workshop_Applications from</param>
         /// <returns>An Object with Flags, indicating the Conference application and the Workshop application</returns>
@@ -81,32 +82,15 @@
             // Permission Level User
             if (this.jwtService.PermissionLevelValid(jwttoken, "user") && this.auth.KeyIsValid(apikey, conference_id))
             {
-                // TODO: new endpoint for checking if the user has applied for Workshops
-                /*if (this._context.Conference_Attendee.Any(ca => ca.Attendee_uid == uid && ca.ConferenceID == conference_id))
-                {
-                    var waForUser = this._context.Workshop_Application.Where(wa => wa.ApplicantUID == uid);
-                    foreach (Workshop_Application wa in waForUser)
-                    {
-                        var current_ws = this._context.Workshop.Where(ws => ws.WorkshopID == wa.WorkshopID).FirstOrDefault();
-                        if (current_ws.ConferenceID == conference_id)
-                        {
-                            return this.Ok(new { ws_applied = true, conf_applied = true});
-                        }
-                    }
-
-                    return this.Ok(new { ws_applied = false, conf_applied = true});
-                }
-                else
-                {
-                    return this.Ok(new { ws_applied = false, conf_applied = false});
-                }*/
+                List<Workshop_Application> wa = this._context.Workshop_Application.Where(w => w.ApplicantUID == uid).ToList();
+                return this.Ok(wa);
             }
 
             return this.Unauthorized();
         }
 
         /// <summary>
-        /// Gets an Overview over the applied Workshops for users
+        /// Gets an Overview over how many people voted for the Workshops at what priority
         /// </summary>
         /// <param name="conference_id">ID of the conference to restrict the Search to</param>
         /// <param name="jwttoken">User Token for Auth</param>

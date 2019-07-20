@@ -33,11 +33,6 @@
         public bool IsBuFaKCouncil { get; set; }
 
         /// <summary>
-        /// Gets or sets a value indicating whether the User has a Train Ticket for the Conference in Question
-        /// </summary>
-        public bool HasTrainticket { get; set; }
-
-        /// <summary>
         /// Gets or sets the Users BuFaK Count
         /// </summary>
         public int Count { get; set; }

@@ -71,7 +71,6 @@ namespace BuFaKAPI.Controllers
 
                 if (!auth.IsExpired() && !string.IsNullOrEmpty(auth.User.LocalId))
                 {
-                    telBot.SendTextMessage("bis hierhin schonmal gut");
                     result.TokenString = this.jwtService.CreateKey(auth.User.LocalId);
                     result.user = await this._context.User.FindAsync(auth.User.LocalId);
                     result.Conferences = allconf;
@@ -83,13 +82,11 @@ namespace BuFaKAPI.Controllers
                 }
                 else
                 {
-                    telBot.SendTextMessage("debug1");
                     return this.BadRequest(this.ModelState);
                 }
             }
             catch (Exception)
             {
-                telBot.SendTextMessage("debug2");
                 return this.BadRequest(this.ModelState);
             }
         }
@@ -159,10 +156,8 @@ namespace BuFaKAPI.Controllers
                         Attendee = ca.Status == "IsAttendee" ? true : false,
                         Priority = ca.Priority
                     };
-                    telBot.SendTextMessage(ufc.ToString());
                     lufc.Add(ufc);
                 }
-                telBot.SendTextMessage(result.ToString());
                 result.UserForConference = lufc;
             }
 
