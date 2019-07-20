@@ -15,6 +15,7 @@ namespace BuFaKAPI.Controllers
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.EntityFrameworkCore;
+    using Microsoft.Extensions.Options;
     using WebApplication1.Models;
 
     [Route("api/[controller]")]
@@ -24,12 +25,14 @@ namespace BuFaKAPI.Controllers
         private readonly MyContext _context;
         private readonly AuthService auth;
         private readonly TelegramBot telBot;
+        private readonly TokenService jwtService;
 
-        public Conference_ApplicationController(MyContext context)
+        public Conference_ApplicationController(MyContext context, IOptions<AppSettings> settings)
         {
             this._context = context;
             this.auth = new AuthService(context);
             this.telBot = new TelegramBot();
+            this.jwtService = new TokenService(this._context, settings);
         }
 
         /// <summary>
@@ -46,15 +49,9 @@ namespace BuFaKAPI.Controllers
             [FromHeader(Name = "conference_id")] int conference_id,
             [FromQuery] string apikey)
         {
-            // TODO Permission Level Admin
-            if (string.IsNullOrEmpty(apikey))
+            // Permission Level: Admin
+            if (this.jwtService.PermissionLevelValid(jwttoken, "admin") && this.auth.KeyIsValid(apikey, conference_id))
             {
-                return this.BadRequest();
-            }
-            else if (this.auth.KeyIsValid(apikey, conference_id))
-            {
-                telBot.SendTextMessage(jwttoken);
-                telBot.SendTextMessage(conference_id.ToString());
                 var users = this._context.Conference_Application.Where(c => c.ConferenceID == conference_id);
                 return this.Ok(users);
             }
@@ -69,6 +66,7 @@ namespace BuFaKAPI.Controllers
         /// </summary>
         /// <param name="apikey">API Key for Authentification</param>
         /// <param name="application">Application Object needed for adding the Application</param>
+        /// <param name="jwttoken">User Token for Auth</param>
         /// <returns>201 on Success</returns>
         /// <response code="400">If ModelState is not valid</response>
         /// <response code="401">If API Key is not valid</response>
@@ -76,10 +74,11 @@ namespace BuFaKAPI.Controllers
         [HttpPost]
         public async Task<IActionResult> PostConference_Application(
                                                                     [FromQuery] string apikey,
-                                                                    [FromBody] IncomingApplication application)
+                                                                    [FromBody] IncomingApplication application,
+                                                                    [FromHeader] string jwttoken)
         {
-            //TODO Permission Level User
-            if (this.auth.KeyIsValid(apikey))
+            // Permission Level: User
+            if (this.jwtService.PermissionLevelValid(jwttoken, "user") && this.auth.KeyIsValid(apikey))
             {
                 if (!this.ModelState.IsValid)
                 {
@@ -149,12 +148,16 @@ namespace BuFaKAPI.Controllers
         /// <param name="responsibleUID">UID from the editing User</param>
         /// <returns>401 if api key not valid</returns>
         [HttpPut("status/")]
-        public async Task<IActionResult> PutConference_ApplicationStatus([FromQuery] string apikey, [FromBody] ChangeCAStatus newstatus, [FromHeader] string responsibleUID)
+        public async Task<IActionResult> PutConference_ApplicationStatus(
+            [FromQuery] string apikey,
+            [FromBody] ChangeCAStatus newstatus,
+            [FromHeader] string jwttoken)
         {
-            //TODO Permission Level SuperAdmin
-            if (this.auth.KeyIsValid(apikey))
+            // Permission Level admin
+            if (this.jwtService.PermissionLevelValid(jwttoken, "admin") && this.auth.KeyIsValid(apikey))
             {
                 var thisca = this._context.Conference_Application.Where(ca => ca.ApplicantUID == newstatus.UID && ca.ConferenceID == newstatus.ConferenceID).FirstOrDefault();
+                var responsibleUID = this.jwtService.GetUIDfromJwtKey(jwttoken);
                 History history = new History
                 {
                     ResponsibleUID = responsibleUID,
@@ -191,15 +194,16 @@ namespace BuFaKAPI.Controllers
         public async Task<IActionResult> ReRegisterConference_Application(
                                                                           [FromQuery] string apikey,
                                                                           [FromBody] ReRegister reregister,
-                                                                          [FromHeader] string responsibleUID,
-                                                                          [FromHeader] int conferenceID)
+                                                                          [FromHeader(Name = "jwttoken")] string jwttoken,
+                                                                          [FromHeader(Name = "conference_id")] int conferenceID)
         {
-            // TODO Permission Level SuperAdmin
-            if (this.auth.KeyIsValid(apikey))
+            // Permission Level Admin
+            if (this.jwtService.PermissionLevelValid(jwttoken, "admin") && this.auth.KeyIsValid(apikey))
             {
                 var currentCA = await this._context.Conference_Application.Where(ca => ca.ApplicantUID == reregister.OldUID
                                                                                     && ca.ConferenceID == conferenceID
                                                                                     && ca.Invalid == false).FirstOrDefaultAsync();
+                string responsibleUID = this.jwtService.GetUIDfromJwtKey(jwttoken);
                 History history = new History
                 {
                     ResponsibleUID = responsibleUID,

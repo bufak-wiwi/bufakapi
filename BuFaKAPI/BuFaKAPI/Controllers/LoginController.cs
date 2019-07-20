@@ -49,7 +49,7 @@ namespace BuFaKAPI.Controllers
         [HttpPost]
         public async Task<IActionResult> LoginUser([FromBody] LoginElement loginElement)
         {
-            // TODO Permission Level User
+            // TODO Permission Level Everyone
             var email = loginElement.Email;
             var password = loginElement.Password;
             if (!this.ModelState.IsValid)
@@ -96,41 +96,41 @@ namespace BuFaKAPI.Controllers
         public IActionResult GetCustomTokens(
             [FromRoute] string uid,
             [FromQuery] string apikey,
-            [FromHeader] int conference_id
-            )
+            [FromHeader(Name = "conference_id")] int conference_id,
+            [FromHeader(Name = "jwttoken")] string jwttoken)
         {
             // TODO Permission Level SuperAdmin
-            if (this.auth.KeyIsValid(apikey))
+            if ( this.jwtService.PermissionLevelValid(jwttoken, "superadmin") && this.auth.KeyIsValid(apikey))
             {
-                if (this._context.Conference.Any(c => c.ConferenceID == conference_id))
+                /*if (this._context.Conference.Any(c => c.ConferenceID == conference_id))
                 {
-                    /*if (this._context.Conference_Attendee.Any(u => u.Attendee_uid == uid && u.ConferenceID == conference_id))
+                    if (this._context.Conference_Attendee.Any(u => u.Attendee_uid == uid && u.ConferenceID == conference_id))
                     {
                         var startdate = this._context.Conference.Find(conference_id).DateStart;
                         var enddate = this._context.Conference.Find(conference_id).DateEnd;
-                        //if (DateTime.Now >= DateTime.Parse(startdate) && DateTime.Now <= DateTime.Parse(enddate))
-                        //{
+                        if (DateTime.Now >= DateTime.Parse(startdate) && DateTime.Now <= DateTime.Parse(enddate))
+                        {
                             var customKey = this.fbService.CreateCustomFBKey(uid);
                             return this.Ok(customKey);
-                        //}
-                        //else
-                        //{
-                        //    this.telBot.sendTextMessage($"Access to GetCustomTokens from {UID} not within correct Timespan");
-                        //    return this.Unauthorized();
-                        //}
+                        }
+                        else
+                        {
+                            this.telBot.sendTextMessage($"Access to GetCustomTokens from {UID} not within correct Timespan");
+                            return this.Unauthorized();
+                        }
 
                     }
                     else
                     {
                         this.telBot.sendTextMessage($"Access to GetCustomTokens from {uid}, user not in Conference_Attendee-Table");
                         return this.Unauthorized();
-                    }*/
+                    }
                 }
                 else
                 {
                     this.telBot.SendTextMessage($"Access to GetCustomTokens from {uid}, Conference not in Database");
                     return this.NotFound();
-                }
+                }*/
             }
             else
             {
@@ -158,8 +158,12 @@ namespace BuFaKAPI.Controllers
             var uid = auth.User.LocalId;
             if (!string.IsNullOrWhiteSpace(uid))
             {
-                Administrator admin = this._context.Administrator.Where(x => x.UID == uid && x.ConferenceID == this.currentConferenceId).FirstOrDefault();
+                Administrator admin = this._context.Administrator.Where(x => x.UID == uid).FirstOrDefault();
                 result.Admin = admin != null ? true : false;
+                if (result.Admin == true)
+                {
+                    result.AdminForConference = this._context.Administrator.Where(x => x.UID == uid).LastOrDefault().ConferenceID;
+                }
             }
 
             return result;
