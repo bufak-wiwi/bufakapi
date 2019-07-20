@@ -21,6 +21,11 @@
         /// Gets or sets the Priority of the Applicant
         /// </summary>
         public int Priority { get; set; }
+        
+        /// <summary>
+        /// Gets or sets a value indicating whether the User is a Helper
+        /// </summary>
+        public bool IsHelper { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether the User is an Alumnus

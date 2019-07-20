@@ -108,6 +108,7 @@ namespace BuFaKAPI.Controllers
                     Priority = application.Priority,
                     IsAlumnus = application.IsAlumnus,
                     IsBuFaKCouncil = application.IsBuFaKCouncil,
+                    IsHelper = application.IsHelper,
                     Note = application.Note,
                     Timestamp = DateTime.Now.ToString(),
                     Hotel = application.Hotel,
