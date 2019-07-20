@@ -7,20 +7,24 @@
     using System.Security.Claims;
     using System.Text;
     using System.Threading.Tasks;
+    using BuFaKAPI.Models;
     using Microsoft.Extensions.Options;
     using Microsoft.IdentityModel.Tokens;
+    using WebApplication1.Models;
 
     public class TokenService
     {
         private readonly string jwtkey;
         private readonly string firebaseapikey;
+        private readonly MyContext _context;
         private readonly SymmetricSecurityKey securityKey;
         private readonly JwtSecurityTokenHandler handler;
         private readonly TelegramBot telBot;
 
-        public TokenService(IOptions<AppSettings> settings)
+        public TokenService(MyContext context, IOptions<AppSettings> settings)
         {
             this.jwtkey = settings.Value.JwtKey;
+            this._context = context;
             this.firebaseapikey = settings.Value.FirebaseApiKey;
             this.securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(this.jwtkey));
             this.handler = new JwtSecurityTokenHandler();
@@ -90,8 +94,39 @@
             return result.ToString();
         }
 
-        public bool JwtTokenIsValid(string token, string role)
+        public bool PermissionLevelValid(string token, string level)
         {
+            string uid = this.GetUIDfromJwtKey(token);
+            User user = this._context.User.Find(uid);
+
+            if (level == "user")
+            {
+                if (this.ValidateJwtKey(token))
+                {
+                    return true;
+                }
+
+                return false;
+            }
+            else if (level == "admin")
+            {
+                if (this.ValidateJwtKey(token) && this._context.Administrator.Any(a => a.UID == uid))
+                {
+                    return true;
+                }
+
+                return false;
+            }
+            else if (level == "superadmin")
+            {
+                if (this.ValidateJwtKey(token) && user.IsSuperAdmin)
+                {
+                    return true;
+                }
+
+                return false;
+            }
+
             return false;
         }
     }

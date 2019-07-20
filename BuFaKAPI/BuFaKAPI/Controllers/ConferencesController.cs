@@ -23,7 +23,7 @@
         {
             this._context = context;
             this.auth = new AuthService(context);
-            this.jwtService = new TokenService(settings);
+            this.jwtService = new TokenService(this._context, settings);
         }
 
         /// <summary>
@@ -35,7 +35,7 @@
         [HttpGet]
         public IActionResult GetConference([FromQuery] string apikey)
         {
-            //TODO Permission Level User
+            // TODO Permission Level User
             if (this.auth.KeyIsValid(apikey))
             {
                 return this.Ok(this._context.Conference);
@@ -51,15 +51,16 @@
         /// </summary>
         /// <param name="id">The ID of the Conference</param>
         /// <param name="apikey">API Key for Authentification</param>
+        /// <param name="jwttoken">JWT Token of the User for Auth</param>
         /// <returns>A Single Conference-Object</returns>
         /// <response code="400">If ModelState is not valid</response>
         /// <response code="401">If API Key is not valid</response>
         /// <response code="404">If ID is not found</response>
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetConference([FromRoute] int id, [FromQuery] string apikey)
+        public async Task<IActionResult> GetConference([FromRoute] int id, [FromQuery] string apikey, [FromHeader] string jwttoken)
         {
-            //TODO Permission Level User
-            if (this.auth.KeyIsValid(apikey))
+            // First Check if the API Key is valid and if the user has the permission level "user"
+            if (this.jwtService.PermissionLevelValid(jwttoken, "user") && this.auth.KeyIsValid(apikey))
             {
                 if (!this.ModelState.IsValid)
                 {
@@ -87,15 +88,19 @@
         /// <param name="id">ID of the Conference to be Updated</param>
         /// <param name="conference">New Conference-Object</param>
         /// <param name="apikey">API Key for Authentification</param>
+        /// <param name="jwttoken">JWT Token of the user for Auth</param>
         /// <returns>No Content</returns>
         /// <response code="400">If ModelState is not valid</response>
         /// <response code="401">If API Key is not valid</response>
         /// <response code="404">If ID of the Conference is not found</response>
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutConference([FromRoute] int id, [FromBody] Conference conference, [FromQuery] string apikey)
+        public async Task<IActionResult> PutConference(
+            [FromRoute] int id,
+            [FromBody] Conference conference,
+            [FromQuery] string apikey,
+            [FromHeader] string jwttoken)
         {
-            // TODO jwtToken einfügen - Level SuperAdmin
-            if (this.auth.KeyIsValid(apikey))
+            if (this.jwtService.PermissionLevelValid(jwttoken, "superadmin") && this.auth.KeyIsValid(apikey))
             {
                 if (!this.ModelState.IsValid)
                 {
@@ -136,21 +141,18 @@
         /// </summary>
         /// <param name="apikey">apikey for Authentification</param>
         /// <param name="pconf">PConf Object, containing the </param>
-        /// <param name="token">jwttoken of the responsible logged-in user</param>
+        /// <param name="jwttoken">jwttoken of the responsible logged-in user</param>
         /// <response code="401">If API Key is not valid or jwtToken is not valid or user is not superuser</response>
         /// <returns>the created conference</returns>
         [HttpPost]
         public async Task<IActionResult> PostConference(
                                                         [FromQuery] string apikey,
                                                         [FromBody] PostConference pconf,
-                                                        [FromHeader] string token)
+                                                        [FromHeader] string jwttoken)
         {
-            //TODO Permission Level SuperAdmin
-            string uid = this.jwtService.GetUIDfromJwtKey(token);
             if (
                 this.auth.KeyIsValid(apikey)
-                && this.auth.IsSuperAdmin(uid)
-                && this.jwtService.ValidateJwtKey(token)
+                && this.jwtService.PermissionLevelValid(jwttoken, "superadmin")
                 )
             {
                 this._context.Conference.Add(pconf.conference);

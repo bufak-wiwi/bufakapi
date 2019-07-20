@@ -34,7 +34,7 @@ namespace BuFaKAPI.Controllers
             this._context = context;
             this.apikey = settings.Value.FirebaseApiKey;
             this.currentConferenceId = settings.Value.CurrentConferenceID;
-            this.jwtService = new TokenService(settings);
+            this.jwtService = new TokenService(this._context, settings);
             this.telBot = new TelegramBot();
             this.fbService = new FirebaseService(context, settings);
             this.auth = new AuthService(context);
@@ -62,10 +62,18 @@ namespace BuFaKAPI.Controllers
             {
                 var result = new LoginResult();
                 var auth = await authProvider.SignInWithEmailAndPasswordAsync(email, password);
+                var conferences = this._context.Conference.Where(c => c.Invalid == false);
+                List<Conference> allconf = new List<Conference>();
+                foreach (Conference conf in conferences)
+                {
+                    allconf.Add(conf);
+                }
+
                 if (!auth.IsExpired() && !string.IsNullOrEmpty(auth.User.LocalId))
                 {
                     result.TokenString = this.jwtService.CreateKey(auth.User.LocalId);
                     result.user = await this._context.User.FindAsync(auth.User.LocalId);
+                    result.Conferences = allconf;
 
                     // set values in result whether the user has already applied to the conference or not
                     result = this.SetAppliedStatus(auth, result);
@@ -85,7 +93,11 @@ namespace BuFaKAPI.Controllers
         }
 
         [HttpGet("customToken/{uid}")]
-        public IActionResult GetCustomTokens([FromRoute] string uid, [FromQuery] string apikey, [FromHeader] int conference_id)
+        public IActionResult GetCustomTokens(
+            [FromRoute] string uid,
+            [FromQuery] string apikey,
+            [FromHeader] int conference_id
+            )
         {
             // TODO Permission Level SuperAdmin
             if (this.auth.KeyIsValid(apikey))

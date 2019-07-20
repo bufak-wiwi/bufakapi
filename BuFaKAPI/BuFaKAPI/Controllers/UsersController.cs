@@ -35,7 +35,7 @@ namespace BuFaKAPI.Controllers
         {
             this._context = context;
             this.apikey = settings.Value.FirebaseApiKey;
-            this.jwtService = new TokenService(settings);
+            this.jwtService = new TokenService(this._context, settings);
             this.telBot = new TelegramBot();
             this.auth = new AuthService(context);
             this.firebase = new FirebaseService(context, settings);

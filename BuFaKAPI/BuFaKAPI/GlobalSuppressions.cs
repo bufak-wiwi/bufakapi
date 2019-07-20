@@ -124,4 +124,5 @@
 [assembly: System.Diagnostics.CodeAnalysis.SuppressMessage("StyleCop.CSharp.NamingRules", "SA1309:Field names must not begin with underscore", Justification = "<Ausstehend>", Scope = "member", Target = "~F:BuFaKAPI.Controllers.NewslettersController._context")]
 [assembly: System.Diagnostics.CodeAnalysis.SuppressMessage("StyleCop.CSharp.ReadabilityRules", "SA1101:Prefix local calls with this", Justification = "<Ausstehend>", Scope = "member", Target = "~M:BuFaKAPI.Controllers.NewslettersController.PostNewsletter(BuFaKAPI.Models.Newsletter,System.String)~System.Threading.Tasks.Task{Microsoft.AspNetCore.Mvc.IActionResult}")]
 [assembly: System.Diagnostics.CodeAnalysis.SuppressMessage("StyleCop.CSharp.ReadabilityRules", "SA1101:Prefix local calls with this", Justification = "<Ausstehend>", Scope = "member", Target = "~M:BuFaKAPI.Controllers.NewslettersController.#ctor(BuFaKAPI.Models.MyContext)")]
+[assembly: System.Diagnostics.CodeAnalysis.SuppressMessage("StyleCop.CSharp.NamingRules", "SA1309:Field names must not begin with underscore", Justification = "<Ausstehend>", Scope = "member", Target = "~F:BuFaKAPI.Services.TokenService._context")]
 
