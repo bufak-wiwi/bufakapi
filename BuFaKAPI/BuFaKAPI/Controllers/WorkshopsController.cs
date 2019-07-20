@@ -9,6 +9,7 @@
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.EntityFrameworkCore;
+    using Microsoft.Extensions.Options;
     using WebApplication1.Models;
 
     [Route("api/[controller]")]
@@ -17,11 +18,13 @@
     {
         private readonly MyContext _context;
         private readonly AuthService auth;
+        private readonly TokenService jwtService;
 
-        public WorkshopsController(MyContext context)
+        public WorkshopsController(MyContext context, IOptions<AppSettings> settings)
         {
             this._context = context;
             this.auth = new AuthService(context);
+            this.jwtService = new TokenService(this._context, settings);
         }
 
         // GET: api/Workshops
@@ -31,13 +34,17 @@
         /// </summary>
         /// <param name="apikey">API Key for Authentification</param>
         /// <param name="conference_id">ID of the Conference to get Workshops from</param>
+        /// <param name="jwttoken">User Token for Auth</param>
         /// <returns>List of Workshop-Objects on Success</returns>
         /// <response code="401">Unauthorized if API Key not valid</response>
         [HttpGet]
-        public IActionResult GetWorkshop([FromQuery] string apikey, [FromHeader] int conference_id)
+        public IActionResult GetWorkshop(
+            [FromQuery] string apikey,
+            [FromHeader(Name = "conference_id")] int conference_id,
+            [FromHeader(Name = "jwttoken")] string jwttoken)
         {
-            // TODO Permission Level User
-            if (this.auth.KeyIsValid(apikey, conference_id))
+            // Permission Level User
+            if (this.jwtService.PermissionLevelValid(jwttoken, "user") && this.auth.KeyIsValid(apikey, conference_id))
             {
                 return this.Ok(this._context.Workshop.Where(ws => ws.ConferenceID == conference_id));
             }
@@ -51,17 +58,21 @@
         /// Gets one specific Workshop-Object from the API
         /// </summary>
         /// <param name="id">ID of the Workshop to be Get</param>
+        /// <param name="jwttoken"></param>
         /// <param name="apikey">API Key for Authentification</param>
         /// <returns>Workshop-Object on Success</returns>
         /// <response code="400">Bad Request if ModelState is not valid</response>
         /// <response code="401">Unathorized if API Key is not valid</response>
         /// <response code="404">Not Found if Workshop-ID is not in the Database</response>
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetWorkshop([FromRoute] int id, [FromQuery] string apikey)
+        public async Task<IActionResult> GetWorkshop(
+            [FromRoute] int id,
+            [FromHeader] string jwttoken,
+            [FromQuery] string apikey)
         {
-            // TODO Permission Level User
+            // Permission Level User
             var workshop = await this._context.Workshop.FindAsync(id);
-            if (this.auth.KeyIsValid(apikey, workshop.ConferenceID))
+            if (this.jwtService.PermissionLevelValid(jwttoken, "user") && this.auth.KeyIsValid(apikey, workshop.ConferenceID))
             {
                 if (!this.ModelState.IsValid)
                 {
@@ -86,16 +97,21 @@
         /// </summary>
         /// <param name="id">ID of the Workshop to be updated</param>
         /// <param name="apikey">API Key for Authentification</param>
+        /// <param name="jwttoken">User Token for Auth</param>
         /// <param name="workshop">Workshop-Object to be Updated</param>
         /// <returns>Updated Workshop-Object on Success</returns>
         /// <response code="400">Bad Request if Model State is not valid</response>
         /// <response code="401">Unauthorized if API Key is not valid</response>
         /// <response code="404">Not found if Workshop-ID is not in the Database</response>
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutWorkshop([FromRoute] int id, [FromQuery] string apikey, [FromBody] Workshop workshop)
+        public async Task<IActionResult> PutWorkshop(
+            [FromRoute] int id,
+            [FromQuery] string apikey,
+            [FromHeader] string jwttoken,
+            [FromBody] Workshop workshop)
         {
-            // TODO Permission Level Admin
-            if (this.auth.KeyIsValid(apikey, workshop.ConferenceID))
+            // Permission Level Admin
+            if (this.jwtService.PermissionLevelValid(jwttoken, "admin") && this.auth.KeyIsValid(apikey, workshop.ConferenceID))
             {
                 if (!this.ModelState.IsValid)
                 {
@@ -143,16 +159,20 @@
         /// Adds a Workshop to the Database
         /// </summary>
         /// <param name="workshop">Workshop Element to be added</param>
+        /// <param name="jwttoken">User Token for Auth</param>
         /// <param name="apikey">APIKey for the access</param>
         /// <returns>Created Item on Success</returns>
         /// <response code="201">Returns the newly created item</response>
         /// <response code="401">when APIKey is not Correct</response>
         /// <response code="400">when Workshop Model is not Valid</response>
         [HttpPost]
-        public async Task<IActionResult> PostWorkshop([FromBody] Workshop workshop, [FromQuery] string apikey)
+        public async Task<IActionResult> PostWorkshop(
+            [FromBody] Workshop workshop,
+            [FromHeader] string jwttoken,
+            [FromQuery] string apikey)
         {
-            // TODO Permission Level Admin
-            if (this.auth.KeyIsValid(apikey, workshop.ConferenceID))
+            // Permission Level Admin
+            if (this.jwtService.PermissionLevelValid(jwttoken, "admin") && this.auth.KeyIsValid(apikey, workshop.ConferenceID))
             {
                 if (!this.ModelState.IsValid)
                 {

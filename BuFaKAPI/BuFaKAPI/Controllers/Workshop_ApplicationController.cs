@@ -10,6 +10,7 @@
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.EntityFrameworkCore;
+    using Microsoft.Extensions.Options;
     using WebApplication1.Models;
 
     [Route("api/[controller]")]
@@ -19,12 +20,14 @@
         private readonly MyContext _context;
         private readonly AuthService auth;
         private readonly TelegramBot telBot;
+        private readonly TokenService jwtService;
 
-        public Workshop_ApplicationController(MyContext context)
+        public Workshop_ApplicationController(MyContext context, IOptions<AppSettings> settings)
         {
             this._context = context;
             this.auth = new AuthService(context);
             this.telBot = new TelegramBot();
+            this.jwtService = new TokenService(this._context, settings);
         }
 
         // GET: api/Workshop_Application
@@ -33,13 +36,17 @@
         /// Gets all Workshop_Applications from one specific Conference
         /// </summary>
         /// <param name="conference_id">The Conference in Question</param>
+        /// <param name="jwttoken">User Token for Auth</param>
         /// <param name="apikey">API Key for Authentification</param>
         /// <returns>A List of Workshop_Application Objects</returns>
         [HttpGet("conference/{conference_id}")]
-        public IActionResult GetWorkshop_Applications([FromRoute] int conference_id, [FromQuery] string apikey)
+        public IActionResult GetWorkshop_Applications(
+            [FromRoute] int conference_id,
+            [FromHeader] string jwttoken,
+            [FromQuery] string apikey)
         {
-            // TODO Permission Level Admin
-            if (this.auth.KeyIsValid(apikey, conference_id))
+            // Permission Level Admin
+            if (this.jwtService.PermissionLevelValid(jwttoken, "admin") && this.auth.KeyIsValid(apikey, conference_id))
             {
                 var workshops_conference = this._context.Workshop.Where(w => w.ConferenceID == conference_id);
                 List<Workshop_Application> wa = new List<Workshop_Application>();
@@ -65,11 +72,16 @@
         /// <param name="uid">ID of the User to get the Workshop_Applications from</param>
         /// <returns>An Object with Flags, indicating the Conference application and the Workshop application</returns>
         [HttpGet("peruser/{uid}")]
-        public IActionResult GetWorkshop_Application_For_User([FromHeader] int conference_id, [FromQuery] string apikey, [FromRoute] string uid)
+        public IActionResult GetWorkshop_Application_For_User(
+            [FromHeader(Name = "conference_id")] int conference_id,
+            [FromHeader(Name = "jwttoken")] string jwttoken,
+            [FromQuery] string apikey,
+            [FromRoute] string uid)
         {
-            // TODO Permission Level User
-            if (this.auth.KeyIsValid(apikey, conference_id))
+            // Permission Level User
+            if (this.jwtService.PermissionLevelValid(jwttoken, "user") && this.auth.KeyIsValid(apikey, conference_id))
             {
+                // TODO: new endpoint for checking if the user has applied for Workshops
                 /*if (this._context.Conference_Attendee.Any(ca => ca.Attendee_uid == uid && ca.ConferenceID == conference_id))
                 {
                     var waForUser = this._context.Workshop_Application.Where(wa => wa.ApplicantUID == uid);
@@ -97,15 +109,18 @@
         /// Gets an Overview over the applied Workshops for users
         /// </summary>
         /// <param name="conference_id">ID of the conference to restrict the Search to</param>
+        /// <param name="jwttoken">User Token for Auth</param>
         /// <param name="apikey">API Key for Authentification</param>
         /// <returns>A List of Applications for each Workshop</returns>
         [HttpGet("overview/")]
-        public IActionResult GetWorkshop_Application_Overview([FromHeader] int conference_id, [FromQuery] string apikey)
+        public IActionResult GetWorkshop_Application_Overview(
+            [FromHeader(Name = "conference_id")] int conference_id,
+            [FromHeader(Name = "jwttoken")] string jwttoken,
+            [FromQuery] string apikey)
         {
-            // TODO Permission Level User
-            if (this.auth.KeyIsValid(apikey, conference_id))
+            // Permission Level User
+            if (this.jwtService.PermissionLevelValid(jwttoken, "user") && this.auth.KeyIsValid(apikey, conference_id))
             {
-                // var attendees = this._context.Conference_Attendee.Where(ca => ca.ConferenceID == conference_id);
                 List<Workshop_Application> ws_applications = this._context.Workshop_Application.ToList();
                 List<Workshop> workshops = this._context.Workshop.ToList();
 
@@ -120,13 +135,6 @@
                         Conference_ID = application.ConferenceID
                     });
                 int user_ws_applicant = 0;
-                /*foreach (Conference_Attendee attendee in attendees)
-                {
-                    if (this._context.Workshop_Application.Any(wa => wa.ApplicantUID == attendee.Attendee_uid))
-                    {
-                        user_ws_applicant++;
-                    }
-                }*/
 
                 List<WSApplication> applications = new List<WSApplication>();
                 foreach (Workshop ws in this._context.Workshop.Where(ws => ws.ConferenceID == conference_id))
@@ -160,16 +168,21 @@
         /// Updates a specific Workshop_Application object
         /// </summary>
         /// <param name="workshop_Application">Workshop_Application Object to be updated</param>
+        /// <param name="jwttoken">User Token for Auth</param>
         /// <param name="apikey">API Key for Authentification</param>
         /// <returns>No Content</returns>
         /// <response code="400">If the ModelState is not valid</response>
         /// <response code="401">If the API Key is not valid</response>
         /// <response code="404">If the to-be-updated Workshop_Application Object does not exist</response>
         [HttpPut]
-        public async Task<IActionResult> PutWorkshop_Application([FromBody] Workshop_Application workshop_Application, [FromQuery] string apikey)
+        public async Task<IActionResult> PutWorkshop_Application(
+            [FromBody] Workshop_Application workshop_Application,
+            [FromHeader] string jwttoken,
+            [FromQuery] string apikey)
         {
-            // TODO Permission Level Admin
-            if (this.auth.KeyIsValid(apikey))
+            // Permission Level Admin
+            // TODO add History
+            if (this.jwtService.PermissionLevelValid(jwttoken, "admin") && this.auth.KeyIsValid(apikey))
             {
                 if (!this.ModelState.IsValid)
                 {
@@ -204,16 +217,20 @@
         /// Adds another Workshop_Application to the Database
         /// </summary>
         /// <param name="applications">A List of Workshop-Applications</param>
+        /// <param name="jwttoken">User Token for Auth</param>
         /// <param name="apikey">API Key for Authentification</param>
         /// <returns>The newly added workshop_application Object</returns>
         /// <response code="400">If the ModelState is not valid</response>
         /// <response code="401">If the API Key is not valid</response>
         /// <response code="404">If the Workshop or the User is not in the Database</response>
         [HttpPost]
-        public async Task<IActionResult> PostWorkshop_Application([FromBody] List<BulkApplication> applications, [FromQuery] string apikey)
+        public async Task<IActionResult> PostWorkshop_Application(
+            [FromBody] List<BulkApplication> applications,
+            [FromHeader] string jwttoken,
+            [FromQuery] string apikey)
         {
-            // TODO Permission Level User
-            if (this.auth.KeyIsValid(apikey))
+            // Permission Level User
+            if (this.jwtService.PermissionLevelValid(jwttoken, "user") && this.auth.KeyIsValid(apikey))
             {
                 var uid = string.Empty;
                 if (!this.ModelState.IsValid)

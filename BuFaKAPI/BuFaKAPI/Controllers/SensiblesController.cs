@@ -9,6 +9,7 @@
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.EntityFrameworkCore;
+    using Microsoft.Extensions.Options;
 
     [Route("api/[controller]")]
     [ApiController]
@@ -17,26 +18,33 @@
         private readonly MyContext _context;
         private readonly AuthService auth;
         private readonly TelegramBot telBot;
+        private readonly TokenService jwtService;
 
-        public SensiblesController(MyContext context)
+        public SensiblesController(MyContext context, IOptions<AppSettings> settings)
         {
             this._context = context;
             this.auth = new AuthService(this._context);
             this.telBot = new TelegramBot();
+            this.jwtService = new TokenService(this._context, settings);
         }
 
         /// <summary>
         /// Gets the valid Sensible Object vor a specific user
         /// </summary>
         /// <param name="conference_id">ID of the Conference in Question</param>
+        /// <param name="jwttoken">User Token for Auth</param>
         /// <param name="uid">ID of the specific User</param>
         /// <param name="apikey">API Key for Authentification</param>
         /// <returns>401 if API Key is not correct</returns>
         [HttpGet("forUser/{uid}")]
-        public IActionResult GetSensibleForUser([FromHeader] int conference_id, [FromRoute] string uid, [FromQuery] string apikey)
+        public IActionResult GetSensibleForUser(
+            [FromHeader(Name = "conference_id")] int conference_id,
+            [FromHeader(Name = "jwttoken")] string jwttoken,
+            [FromRoute] string uid,
+            [FromQuery] string apikey)
         {
-            // TODO Permission Level Admin
-            if (this.auth.KeyIsValid(apikey))
+            // Permission Level Admin
+            if (this.jwtService.PermissionLevelValid(jwttoken, "user") && this.auth.KeyIsValid(apikey))
             {
                 Sensible currentSensible = this._context.Sensible.Where(s => s.ConferenceID == conference_id
                                                                      && s.UID == uid
@@ -51,13 +59,17 @@
         /// Gets all valid Sensible Objects for a specific Conference.
         /// </summary>
         /// <param name="conference_id">ID of the Conference in Question</param>
+        /// <param name="jwttoken">User Token for Auth</param>
         /// <param name="apikey">API Key for authentification</param>
         /// <returns>401 if API Key not valid</returns>
         [HttpGet("forConference/")]
-        public IActionResult GetSensibleForConference([FromHeader] int conference_id, [FromQuery] string apikey)
+        public IActionResult GetSensibleForConference(
+            [FromHeader(Name = "conference_id")] int conference_id,
+            [FromHeader(Name = "jwttoken")] string jwttoken,
+            [FromQuery] string apikey)
         {
-            // TODO Permission Level Admin
-            if (this.auth.KeyIsValid(apikey))
+            // Permission Level Admin
+            if (this.jwtService.PermissionLevelValid(jwttoken, "admin") && this.auth.KeyIsValid(apikey))
             {
                 List<Sensible> sensibles = this._context.Sensible.Where(s => s.ConferenceID == conference_id
                                                                 && s.Invalid == false).ToList();
@@ -73,19 +85,20 @@
         /// <param name="conference_id">ID of the Conference in Question</param>
         /// <param name="sensible">Sensible Object to be changed</param>
         /// <param name="apikey">API Key for Authentification</param>
-        /// <param name="responsibleUID">UID of the one responsible for the Action</param>
+        /// <param name="jwttoken">User Token for Auth</param>
         /// <returns>401, if API Key is not valid</returns>
         [HttpPut]
         public async Task<IActionResult> PutSensible(
-                                                        [FromHeader] int conference_id,
+                                                        [FromHeader(Name = "conference_id")] int conference_id,
                                                         [FromBody] Sensible sensible,
                                                         [FromQuery] string apikey,
-                                                        [FromHeader] string responsibleUID)
+                                                        [FromHeader(Name = "jwttoken")] string jwttoken)
         {
-            // TODO Permission Level User
-            if (this.auth.KeyIsValid(apikey))
+            // Permission Level User
+            if (this.jwtService.PermissionLevelValid(jwttoken, "user") && this.auth.KeyIsValid(apikey))
             {
                 Sensible oldSensible = this._context.Sensible.FindAsync(sensible.SensibleID).Result;
+                string responsibleUID = this.jwtService.GetUIDfromJwtKey(jwttoken);
                 History history = new History
                 {
                     ResponsibleUID = responsibleUID,

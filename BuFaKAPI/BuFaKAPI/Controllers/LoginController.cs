@@ -49,7 +49,7 @@ namespace BuFaKAPI.Controllers
         [HttpPost]
         public async Task<IActionResult> LoginUser([FromBody] LoginElement loginElement)
         {
-            // TODO Permission Level Everyone
+            // Permission Level Everyone
             var email = loginElement.Email;
             var password = loginElement.Password;
             if (!this.ModelState.IsValid)
@@ -86,23 +86,23 @@ namespace BuFaKAPI.Controllers
                     return this.BadRequest(this.ModelState);
                 }
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 return this.BadRequest(this.ModelState);
             }
         }
 
-        [HttpGet("customToken/{uid}")]
+        /*[HttpGet("customToken/{uid}")]
         public IActionResult GetCustomTokens(
             [FromRoute] string uid,
             [FromQuery] string apikey,
             [FromHeader(Name = "conference_id")] int conference_id,
             [FromHeader(Name = "jwttoken")] string jwttoken)
         {
-            // TODO Permission Level SuperAdmin
+            // Permission Level SuperAdmin
             if ( this.jwtService.PermissionLevelValid(jwttoken, "superadmin") && this.auth.KeyIsValid(apikey))
             {
-                /*if (this._context.Conference.Any(c => c.ConferenceID == conference_id))
+                if (this._context.Conference.Any(c => c.ConferenceID == conference_id))
                 {
                     if (this._context.Conference_Attendee.Any(u => u.Attendee_uid == uid && u.ConferenceID == conference_id))
                     {
@@ -130,7 +130,7 @@ namespace BuFaKAPI.Controllers
                 {
                     this.telBot.SendTextMessage($"Access to GetCustomTokens from {uid}, Conference not in Database");
                     return this.NotFound();
-                }*/
+                }
             }
             else
             {
@@ -138,7 +138,7 @@ namespace BuFaKAPI.Controllers
             }
 
             return this.NotFound();
-        }
+        }*/
 
         private LoginResult SetAppliedStatus(FirebaseAuthLink auth, LoginResult result)
         {

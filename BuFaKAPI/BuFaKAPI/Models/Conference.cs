@@ -16,6 +16,8 @@ namespace WebApplication1.Models
         [Key]
         public int ConferenceID { get; set; }
 
+        public string Name { get; set; }
+
         public string DateStart { get; set; }
 
         public string DateEnd { get; set; }

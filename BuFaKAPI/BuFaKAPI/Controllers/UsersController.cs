@@ -48,13 +48,17 @@ namespace BuFaKAPI.Controllers
         /// </summary>
         /// <param name="conference_id">ID of the Conference in Question</param>
         /// <param name="apikey">API Key for Authentification</param>
+        /// <param name="jwttoken">User Token for Auth</param>
         /// <returns>List of Users (UID, Surname, Name)</returns>
         [HttpGet("byconference/{conference_id}")]
-        public IActionResult GetUser([FromRoute] int conference_id, [FromQuery] string apikey)
+        public IActionResult GetUser(
+            [FromRoute] int conference_id,
+            [FromQuery] string apikey,
+            [FromHeader] string jwttoken)
         {
-            // TODO Permission Level Admin
+            // Permission Level Admin
             List<UserByConference> ubc = new List<UserByConference>();
-            if (this.auth.KeyIsValid(apikey, conference_id))
+            if (this.jwtService.PermissionLevelValid(jwttoken, "admin") && this.auth.KeyIsValid(apikey, conference_id))
             {
                 var applications = this._context.Conference_Application.Where(ca => ca.ConferenceID == conference_id);
                 foreach (Conference_Application ca in applications)
@@ -86,9 +90,11 @@ namespace BuFaKAPI.Controllers
         /// <response code="404">Not Found, if User ID is not found in the Database</response>
         /// <response code="418">I'm A Teapot, if JWToken Lifespan is exceeded</response>
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetUser([FromRoute] string id, [FromHeader] string jwttoken)
+        public async Task<IActionResult> GetUser(
+            [FromRoute] string id,
+            [FromHeader] string jwttoken)
         {
-            // TODO Permission Level User
+            // Permission Level User
             if (!this.ModelState.IsValid)
             {
                 return this.BadRequest(this.ModelState);
@@ -134,87 +140,103 @@ namespace BuFaKAPI.Controllers
         /// <summary>
         /// Changes the Password of a specific User
         /// </summary>
+        /// <param name="jwttoken">User Token for Auth</param>
         /// <param name="newpassword">The Data used for the Password-Change</param>
         /// <returns>No Content</returns>
         [HttpPut("passwordchange/")]
-        public async Task<IActionResult> PasswordChange([FromBody] NewPasswordObject newpassword)
+        public async Task<IActionResult> PasswordChange(
+            [FromHeader] string jwttoken,
+            [FromBody] NewPasswordObject newpassword)
         {
-            // TODO Permission Level User
-            try
+            // Permission Level User
+            if (this.jwtService.PermissionLevelValid(jwttoken, "user"))
             {
-                var response = await this.firebase.PasswordChange(newpassword.Email, newpassword.OldPassword, newpassword.NewPassword);
-                if (string.IsNullOrWhiteSpace(response))
+                try
                 {
-                    return this.Conflict();
+                    var response = await this.firebase.PasswordChange(newpassword.Email, newpassword.OldPassword, newpassword.NewPassword);
+                    if (string.IsNullOrWhiteSpace(response))
+                    {
+                        return this.Conflict();
+                    }
+                    else if (response == "302")
+                    {
+                        return new StatusCodeResult(StatusCodes.Status226IMUsed);
+                    }
+                    else
+                    {
+                        return this.Ok(response);
+                    }
                 }
-                else if (response == "302")
+                catch (FirebaseAuthException)
                 {
-                    return new StatusCodeResult(StatusCodes.Status226IMUsed);
+                    return this.BadRequest();
                 }
-                else
+                catch (AggregateException)
                 {
-                    return this.Ok(response);
+                    return this.BadRequest();
                 }
             }
-            catch (FirebaseAuthException)
-            {
-                return this.BadRequest();
-            }
-            catch (AggregateException)
-            {
-                return this.BadRequest();
-            }
+
+            return this.Unauthorized();
         }
 
         /// <summary>
         /// Function to change the Mail Adress
         /// </summary>
+        /// <param name="jwttoken">User Token for Auth</param>
         /// <param name="newemail">NewEmail Object</param>
         /// <returns>No Content</returns>
         [HttpPut("newemail/")]
-        public async Task<IActionResult> NewEmail([FromBody] NewEmailObject newemail)
+        public async Task<IActionResult> NewEmail(
+            [FromHeader] string jwttoken,
+            [FromBody] NewEmailObject newemail)
         {
-            // TODO Permission Level User
-            try
+            // Permission Level User
+            if (this.jwtService.PermissionLevelValid(jwttoken, "user"))
             {
-                var response = await this.firebase.EmailChange(newemail.OldEmail, newemail.Password, newemail.NewEmail);
-                if (string.IsNullOrWhiteSpace(response))
-                {
-                    return this.Conflict();
-                }
-                else if (response == "302")
-                {
-                    return new StatusCodeResult(StatusCodes.Status302Found);
-                }
-
-                var user = this._context.User.FindAsync(newemail.UID).Result;
-                user.Email = newemail.NewEmail;
                 try
                 {
-                    await this._context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!this.UserExists(newemail.UID))
+                    var response = await this.firebase.EmailChange(newemail.OldEmail, newemail.Password, newemail.NewEmail);
+                    if (string.IsNullOrWhiteSpace(response))
                     {
-                        return this.NotFound();
+                        return this.Conflict();
                     }
-                    else
+                    else if (response == "302")
                     {
-                        throw;
+                        return new StatusCodeResult(StatusCodes.Status302Found);
                     }
-                }
 
-                return this.Ok(response);
+                    var user = this._context.User.FindAsync(newemail.UID).Result;
+                    user.Email = newemail.NewEmail;
+                    try
+                    {
+                        await this._context.SaveChangesAsync();
+                    }
+                    catch (DbUpdateConcurrencyException)
+                    {
+                        if (!this.UserExists(newemail.UID))
+                        {
+                            return this.NotFound();
+                        }
+                        else
+                        {
+                            throw;
+                        }
+                    }
+
+                    return this.Ok(response);
+                }
+                catch (FirebaseAuthException)
+                {
+                    return this.BadRequest();
+                }
+                catch (AggregateException)
+                {
+                    return this.BadRequest();
+                }
             }
-            catch (FirebaseAuthException)
-            {
-                return this.BadRequest();
-            }
-            catch (AggregateException)
-            {
-                return this.BadRequest();
-            }
+
+            return this.Unauthorized();
         }
 
         /// <summary>
@@ -229,12 +251,15 @@ namespace BuFaKAPI.Controllers
         /// <response code="404">Not Found, when User ID not found in the Database</response>
         /// <response code="418">I'm A Teapot, if JW Token Lifespan is exceeded</response>
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutUser([FromRoute] string id, [FromHeader] string jwttoken, [FromBody] User user)
+        public async Task<IActionResult> PutUser(
+            [FromRoute] string id,
+            [FromHeader] string jwttoken,
+            [FromBody] User user)
         {
-            // TODO Permission Level User
-            try
+            // Permission Level User
+            if (this.jwtService.PermissionLevelValid(jwttoken, "user"))
             {
-                if (this.jwtService.ValidateJwtKey(jwttoken))
+                try
                 {
                     if (this.jwtService.GetUIDfromJwtKey(jwttoken) == id)
                     {
@@ -269,10 +294,10 @@ namespace BuFaKAPI.Controllers
                         return this.NoContent();
                     }
                 }
-            }
-            catch (SecurityTokenExpiredException)
-            {
-                return new StatusCodeResult(StatusCodes.Status418ImATeapot);
+                catch (SecurityTokenExpiredException)
+                {
+                    return new StatusCodeResult(StatusCodes.Status418ImATeapot);
+                }
             }
 
             return this.Unauthorized();
@@ -289,6 +314,7 @@ namespace BuFaKAPI.Controllers
         [HttpPost]
         public async Task<IActionResult> PostUser([FromBody] UserWithPassword userWithPassword, [FromQuery] string apikey)
         {
+            // Permission Level Everyone
             if (this.auth.KeyIsValid(apikey))
             {
                 if (!this.ModelState.IsValid)
@@ -360,40 +386,45 @@ namespace BuFaKAPI.Controllers
         /// <response code="401">Unauthorized, if JWT Token is not valid</response>
         /// <response code="418">I'm A Teapot, if JWT Token lifetime is exceeded</response>
         [HttpDelete]
-        public async Task<IActionResult> DeleteUser([FromHeader] string jwttoken, [FromBody] UserWithPassword uwp)
+        public async Task<IActionResult> DeleteUser(
+            [FromHeader] string jwttoken,
+            [FromBody] UserWithPassword uwp)
         {
-            // TODO Permission Level User
-            try
+            // Permission Level Admin
+            if (this.jwtService.PermissionLevelValid(jwttoken, "admin"))
             {
-                if (this.jwtService.ValidateJwtKey(jwttoken))
+                try
                 {
-                    if (this.jwtService.GetUIDfromJwtKey(jwttoken) == uwp.Uid)
+                    if (this.jwtService.ValidateJwtKey(jwttoken))
                     {
-                        if (!this.ModelState.IsValid)
+                        if (this.jwtService.GetUIDfromJwtKey(jwttoken) == uwp.Uid)
                         {
-                            return this.BadRequest(this.ModelState);
-                        }
+                            if (!this.ModelState.IsValid)
+                            {
+                                return this.BadRequest(this.ModelState);
+                            }
 
-                        var user = await this._context.User.FindAsync(uwp.Uid);
-                        if (user == null)
-                        {
-                            return this.NotFound();
-                        }
+                            var user = await this._context.User.FindAsync(uwp.Uid);
+                            if (user == null)
+                            {
+                                return this.NotFound();
+                            }
 
-                        this._context.User.Remove(user);
-                        await this._context.SaveChangesAsync();
-                        this.firebase.DeleteUser(uwp.Uid, uwp.Password);
-                        return this.Ok(user);
+                            this._context.User.Remove(user);
+                            await this._context.SaveChangesAsync();
+                            this.firebase.DeleteUser(uwp.Uid, uwp.Password);
+                            return this.Ok(user);
+                        }
                     }
                 }
-            }
-            catch (SecurityTokenExpiredException)
-            {
-                return new StatusCodeResult(StatusCodes.Status418ImATeapot);
+                catch (SecurityTokenExpiredException)
+                {
+                    return new StatusCodeResult(StatusCodes.Status418ImATeapot);
+                }
             }
 
             return this.Unauthorized();
-            }
+        }
 
         private bool UserExists(string id)
         {

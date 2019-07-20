@@ -30,13 +30,16 @@
         /// Gets all the Conferences from the API
         /// </summary>
         /// <param name="apikey">API Key for the Conference</param>
+        /// <param name="jwttoken">Token of the User for Auth</param>
         /// <returns>myreturn</returns>
         // GET: api/Conferences
         [HttpGet]
-        public IActionResult GetConference([FromQuery] string apikey)
+        public IActionResult GetConference(
+            [FromQuery] string apikey,
+            [FromHeader] string jwttoken)
         {
-            // TODO Permission Level User
-            if (this.auth.KeyIsValid(apikey))
+            // Permission Level User
+            if (this.jwtService.PermissionLevelValid(jwttoken, "user") && this.auth.KeyIsValid(apikey))
             {
                 return this.Ok(this._context.Conference);
             }

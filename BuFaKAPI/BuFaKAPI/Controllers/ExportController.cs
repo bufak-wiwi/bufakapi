@@ -6,6 +6,7 @@
     using BuFaKAPI.Models.SubModels;
     using BuFaKAPI.Services;
     using Microsoft.AspNetCore.Mvc;
+    using Microsoft.Extensions.Options;
     using WebApplication1.Models;
 
     [Route("api/[controller]")]
@@ -16,12 +17,14 @@
         private readonly string apikey;
         private readonly TelegramBot telBot;
         private readonly AuthService auth;
+        private readonly TokenService jwtService;
 
-        public ExportController(MyContext context)
+        public ExportController(MyContext context, IOptions<AppSettings> settings)
         {
             this._context = context;
             this.telBot = new TelegramBot();
             this.auth = new AuthService(context);
+            this.jwtService = new TokenService(this._context, settings);
         }
 
         // GET: api/export/complete/1
@@ -31,12 +34,16 @@
         /// </summary>
         /// <param name="conference_id">ID of the Conference in Question</param>
         /// <param name="apikey">API Key for authentification</param>
+        /// <param name="jwttoken">User Token for Auth</param>
         /// <returns>19 Attributes in one Object</returns>
         [HttpGet("complete/{conference_id}")]
-        public IActionResult GetAll([FromRoute] int conference_id, [FromQuery] string apikey)
+        public IActionResult GetAll(
+            [FromRoute] int conference_id,
+            [FromQuery] string apikey,
+            [FromHeader] string jwttoken)
         {
-            // TODO Permission Level Admin
-            if (this.auth.KeyIsValid(apikey, conference_id))
+            // Permission Level Admin
+            if (this.jwtService.PermissionLevelValid(jwttoken, "admin") && this.auth.KeyIsValid(apikey, conference_id))
             {
                 List<CompleteExport> re = new List<CompleteExport>();
                 var applications = this._context.Conference_Application.Where(ca => ca.ConferenceID == conference_id);
@@ -78,13 +85,17 @@
         /// TODO: Gets an Export of all the ApplicantData of one Conference
         /// </summary>
         /// <param name="conference_id">ID of the Conference in Question</param>
+        /// <param name="jwttoken">User Token for Auth</param>
         /// <param name="apikey">API Key for authentification</param>
         /// <returns>19 Attributes in one Object</returns>
         [HttpGet("badges")]
-        public IActionResult GetBadges([FromHeader] int conference_id, [FromQuery] string apikey)
+        public IActionResult GetBadges(
+            [FromHeader(Name = "conference_id")] int conference_id,
+            [FromHeader(Name = "jwttoken")] string jwttoken,
+            [FromQuery] string apikey)
         {
-            // TODO Permission Level Admin
-            if (this.auth.KeyIsValid(apikey, conference_id))
+            // Permission Level Admin
+            if (this.jwtService.PermissionLevelValid(jwttoken, "admin") && this.auth.KeyIsValid(apikey, conference_id))
             {
                 return this.Ok();
             }

@@ -9,6 +9,7 @@
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.EntityFrameworkCore;
+    using Microsoft.Extensions.Options;
     using WebApplication1.Models;
 
     public class WorkshopOverview
@@ -38,18 +39,23 @@
     {
         private readonly MyContext _context;
         private readonly AuthService auth;
+        private readonly TokenService jwtService;
 
-        public WorkshopApplicationProcessingController(MyContext context)
+        public WorkshopApplicationProcessingController(MyContext context, IOptions<AppSettings> settings)
         {
             this._context = context;
             this.auth = new AuthService(context);
+            this.jwtService = new TokenService(this._context, settings);
         }
 
         [HttpGet("{conference_id}")]
-        public IActionResult GetOverview([FromRoute] int conference_id, [FromQuery] string apikey)
+        public IActionResult GetOverview(
+            [FromRoute] int conference_id,
+            [FromHeader] string jwttoken,
+            [FromQuery] string apikey)
         {
-            // TODO Permission Level Admin
-            if (this.auth.KeyIsValid(apikey, conference_id))
+            // Permission Level Admin
+            if (this.jwtService.PermissionLevelValid(jwttoken, "admin") && this.auth.KeyIsValid(apikey, conference_id))
             {
                 List<WorkshopOverview> overview = new List<WorkshopOverview>();
                 var workshops = this._context.Workshop.Where(w => w.ConferenceID == conference_id);
@@ -83,10 +89,10 @@
             }
         }
 
-        [HttpPut("{conference_id}")]
+        /*[HttpPut("{conference_id}")]
         public async Task<IActionResult> PutWorkshopApplicationProcessing([FromRoute] int conference_id, [FromQuery] string apikey, [FromBody] List<WorkshopOverview> overview)
         {
-            // TODO Permission Level Admin
+            // Permission Level Admin
             if (this.auth.KeyIsValid(apikey, conference_id))
             {
                 foreach (WorkshopOverview ov in overview)
@@ -94,7 +100,7 @@
                     if (ov.Is_attendee)
                     {
                         // wenn nicht in datenbank, packs rein
-                        /*if (!this._context.Workshop_Attendee.Any(wat => wat.attendee_uid == ov.ApplicantUID && wat.workshop_id == ov.Workshop_id))
+                        if (!this._context.Workshop_Attendee.Any(wat => wat.attendee_uid == ov.ApplicantUID && wat.workshop_id == ov.Workshop_id))
                         {
                             Workshop_Attendee current_WA = new Workshop_Attendee
                             {
@@ -104,16 +110,16 @@
                                 is_helper = ov.IsHelper
                             };
                             this._context.Add(current_WA);
-                        }*/
+                        }
                     }
                     else
                     {
                         // wenn in Datenbank, nimms raus
-                        /*if (this._context.Workshop_Attendee.Any(wat => wat.attendee_uid == ov.ApplicantUID && wat.workshop_id == ov.Workshop_id))
+                        if (this._context.Workshop_Attendee.Any(wat => wat.attendee_uid == ov.ApplicantUID && wat.workshop_id == ov.Workshop_id))
                         {
                             Workshop_Attendee current_WA = this._context.Workshop_Attendee.Where(wat => wat.attendee_uid == ov.ApplicantUID && wat.workshop_id == ov.Workshop_id).FirstOrDefault();
                             this._context.Remove(current_WA);
-                        }*/
+                        }
                     }
 
                     Workshop_Application current_WAP = this._context.Workshop_Application.Where(wap => wap.WorkshopID == ov.Workshop_id && wap.ApplicantUID == ov.Applicant_uid).FirstOrDefault();
@@ -126,9 +132,7 @@
                 }
                 catch (DbUpdateException)
                 {
-                    /*
-                     * Do nothing
-                     */
+                      Do nothing
                 }
 
                 return this.Ok();
@@ -137,6 +141,6 @@
             {
                 return this.Unauthorized();
             }
-        }
+        }*/
     }
 }
