@@ -11,6 +11,15 @@
     using Microsoft.Extensions.Options;
     using WebApplication1.Models;
 
+    public class ConferencePhases
+    {
+        public bool ConferenceApplicationPhase { get; set; }
+
+        public bool WorkshopApplicatonPhase { get; set; }
+
+        public bool WorkshopSuggestionPhase { get; set; }
+    }
+
     [Route("api/[controller]")]
     [ApiController]
     public class ConferencesController : ControllerBase
@@ -193,6 +202,44 @@
                 return this.CreatedAtAction("GetConference", new { id = pconf.conference.ConferenceID }, pconf.conference);
             }
 
+            return this.Unauthorized();
+        }
+
+        [HttpPut("phases/")]
+
+        public async Task<IActionResult> UpdatePhasesForConference(
+            [FromHeader(Name = "conference_id")] int conference_id,
+            [FromHeader(Name = "jwttoken")] string jwttoken,
+            [FromQuery] string apikey,
+            [FromBody] ConferencePhases conferencephases)
+        {
+            if (this.jwtService.PermissionLevelValid(jwttoken, "admin") && this.auth.KeyIsValid(apikey))
+            {
+                Conference conf = this._context.Conference.FindAsync(conference_id).Result;
+                conf.ConferenceApplicationPhase = conferencephases.ConferenceApplicationPhase;
+                conf.WorkshopApplicationPhase = conferencephases.WorkshopApplicatonPhase;
+                conf.WorkshopSuggestionPhase = conferencephases.WorkshopSuggestionPhase;
+
+                this._context.Entry(conf).State = EntityState.Modified;
+
+                try
+                {
+                    await this._context.SaveChangesAsync();
+                }
+                catch (DbUpdateConcurrencyException)
+                {
+                    if (!this.ConferenceExists(conference_id))
+                    {
+                        return this.NotFound();
+                    }
+                    else
+                    {
+                        throw;
+                    }
+                }
+
+                return this.Ok(conf);
+            }
             return this.Unauthorized();
         }
 

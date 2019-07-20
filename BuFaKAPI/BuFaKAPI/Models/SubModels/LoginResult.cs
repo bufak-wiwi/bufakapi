@@ -6,19 +6,26 @@
     using System.Threading.Tasks;
     using WebApplication1.Models;
 
+    public class UserForConference
+    {
+        public int Conference_ID { get; set; }
+
+        public bool Applied { get; set; }
+
+        public bool Admin { get; set; }
+
+        public bool Attendee { get; set; }
+
+        public int Priority { get; set; }
+    }
+
     public class LoginResult
     {
         public string TokenString { get; set; }
 
         public User user { get; set; }
 
-        public bool Applied { get; set; }
-
-        public int Priority { get; set; }
-
-        public bool Admin { get; set; }
-
-        public int AdminForConference { get; set; }
+        public List<UserForConference> UserForConference { get; set; }
 
         public List<Conference> Conferences { get; set; }
     }

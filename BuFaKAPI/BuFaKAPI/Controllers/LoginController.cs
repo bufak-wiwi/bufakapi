@@ -71,23 +71,25 @@ namespace BuFaKAPI.Controllers
 
                 if (!auth.IsExpired() && !string.IsNullOrEmpty(auth.User.LocalId))
                 {
+                    telBot.SendTextMessage("bis hierhin schonmal gut");
                     result.TokenString = this.jwtService.CreateKey(auth.User.LocalId);
                     result.user = await this._context.User.FindAsync(auth.User.LocalId);
                     result.Conferences = allconf;
 
                     // set values in result whether the user has already applied to the conference or not
-                    result = this.SetAppliedStatus(auth, result);
-                    result = this.SetAdminStatus(auth, result);
+                    result = this.SetAppliedAndAdminStatus(auth, result);
 
                     return this.Ok(result);
                 }
                 else
                 {
+                    telBot.SendTextMessage("debug1");
                     return this.BadRequest(this.ModelState);
                 }
             }
             catch (Exception)
             {
+                telBot.SendTextMessage("debug2");
                 return this.BadRequest(this.ModelState);
             }
         }
@@ -140,33 +142,32 @@ namespace BuFaKAPI.Controllers
             return this.NotFound();
         }*/
 
-        private LoginResult SetAppliedStatus(FirebaseAuthLink auth, LoginResult result)
+        private LoginResult SetAppliedAndAdminStatus(FirebaseAuthLink auth, LoginResult result)
         {
             var uid = auth.User.LocalId;
             if (!string.IsNullOrWhiteSpace(uid))
             {
-                Conference_Application application = this._context.Conference_Application.Where(x => x.ApplicantUID == uid && x.ConferenceID == this.currentConferenceId).FirstOrDefault();
-                result.Applied = application != null ? true : false;
-                result.Priority = application != null ? application.Priority : 0;
-            }
-
-            return result;
-        }
-
-        private LoginResult SetAdminStatus(FirebaseAuthLink auth, LoginResult result)
-        {
-            var uid = auth.User.LocalId;
-            if (!string.IsNullOrWhiteSpace(uid))
-            {
-                Administrator admin = this._context.Administrator.Where(x => x.UID == uid).FirstOrDefault();
-                result.Admin = admin != null ? true : false;
-                if (result.Admin == true)
+                List<Conference_Application> applications = this._context.Conference_Application.Where(ca => ca.ApplicantUID == uid).ToList();
+                List<UserForConference> lufc = new List<UserForConference>();
+                foreach (Conference_Application ca in applications)
                 {
-                    result.AdminForConference = this._context.Administrator.Where(x => x.UID == uid).LastOrDefault().ConferenceID;
+                    UserForConference ufc = new UserForConference
+                    {
+                        Conference_ID = ca.ConferenceID,
+                        Applied = true,
+                        Admin = this._context.Administrator.Any(a => a.ConferenceID == ca.ConferenceID && a.UID == uid) ? true : false,
+                        Attendee = ca.Status == "IsAttendee" ? true : false,
+                        Priority = ca.Priority
+                    };
+                    telBot.SendTextMessage(ufc.ToString());
+                    lufc.Add(ufc);
                 }
+                telBot.SendTextMessage(result.ToString());
+                result.UserForConference = lufc;
             }
 
             return result;
         }
+
     }
 }
