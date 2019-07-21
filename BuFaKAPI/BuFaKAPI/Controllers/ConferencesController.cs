@@ -27,12 +27,14 @@
         private readonly MyContext _context;
         private readonly AuthService auth;
         private readonly TokenService jwtService;
+        private readonly TelegramBot telBot;
 
         public ConferencesController(MyContext context, IOptions<AppSettings> settings)
         {
             this._context = context;
             this.auth = new AuthService(context);
             this.jwtService = new TokenService(this._context, settings);
+            this.telBot = new TelegramBot();
         }
 
         /// <summary>
@@ -71,11 +73,14 @@
         [HttpGet("{id}")]
         public async Task<IActionResult> GetConference([FromRoute] int id, [FromQuery] string apikey, [FromHeader] string jwttoken)
         {
+            this.telBot.SendTextMessage("request angekommen");
             // First Check if the API Key is valid and if the user has the permission level "user"
             if (this.jwtService.PermissionLevelValid(jwttoken, "user") && this.auth.KeyIsValid(apikey))
             {
+                this.telBot.SendTextMessage("validitätscheck ok");
                 if (!this.ModelState.IsValid)
                 {
+                    this.telBot.SendTextMessage("modelstate nicht valide");
                     return this.BadRequest(this.ModelState);
                 }
 
