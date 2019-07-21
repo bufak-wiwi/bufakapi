@@ -154,6 +154,7 @@ namespace BuFaKAPI.Controllers
                         Applied = true,
                         Admin = this._context.Administrator.Any(a => a.ConferenceID == ca.ConferenceID && a.UID == uid) ? true : false,
                         Attendee = ca.Status == "IsAttendee" ? true : false,
+                        Rejected = ca.Status == "IsRejected" ? true : false,
                         Priority = ca.Priority
                     };
                     lufc.Add(ufc);

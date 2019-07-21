@@ -16,6 +16,8 @@
 
         public bool Attendee { get; set; }
 
+        public bool Rejected { get; set; }
+
         public int Priority { get; set; }
     }
 
