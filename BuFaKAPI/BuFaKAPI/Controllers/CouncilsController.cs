@@ -38,11 +38,10 @@
         /// <response code="401">Unauthorized, if API Key is not valid</response>
         [HttpGet]
         public IActionResult GetCouncil(
-            [FromQuery] string apikey,
-            [FromHeader]string jwttoken)
+            [FromQuery] string apikey)
         {
-            // Permission Level User
-            if (this.jwtService.PermissionLevelValid(jwttoken, "user") && this.auth.KeyIsValid(apikey))
+            // Permission Level Everyone
+            if (this.auth.KeyIsValid(apikey))
             {
                 return this.Ok(this._context.Council);
             }
