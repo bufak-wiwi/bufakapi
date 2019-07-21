@@ -73,6 +73,10 @@
         [HttpGet("{id}")]
         public async Task<IActionResult> GetConference([FromRoute] int id, [FromQuery] string apikey, [FromHeader] string jwttoken)
         {
+            if (string.IsNullOrEmpty(jwttoken) || string.IsNullOrEmpty(apikey))
+            {
+                return this.NoContent();
+            }
             // First Check if the API Key is valid and if the user has the permission level "user"
             if (this.jwtService.PermissionLevelValid(jwttoken, "user") && this.auth.KeyIsValid(apikey))
             {
