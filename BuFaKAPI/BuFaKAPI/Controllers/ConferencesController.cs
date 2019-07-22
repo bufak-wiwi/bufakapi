@@ -211,10 +211,10 @@
             return this.Unauthorized();
         }
 
-        [HttpPut("phases/")]
+        [HttpPut("phases/{conference_id}")]
 
         public async Task<IActionResult> UpdatePhasesForConference(
-            [FromHeader(Name = "conference_id")] int conference_id,
+            [FromRoute] int conference_id,
             [FromHeader(Name = "jwttoken")] string jwttoken,
             [FromQuery] string apikey,
             [FromBody] ConferencePhases conferencephases)
