@@ -13,6 +13,7 @@ nupkg/
 **/bufak-wiso-e960b1a417d5.json
 **/KeyManager.cs
 **/appsettings.json
+**/TelegramBot.cs
 
 # Visual Studio Code
 .vscode
