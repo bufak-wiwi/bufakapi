@@ -40,5 +40,7 @@ namespace BuFaKAPI.Models
         public DbSet<BuFaKAPI.Models.History> History { get; set; }
 
         public DbSet<BuFaKAPI.Models.Newsletter> Newsletter { get; set; }
+
+        public DbSet<BuFaKAPI.Models.ApplicationAuth> ApplicationAuth { get; set; }
     }
 }
