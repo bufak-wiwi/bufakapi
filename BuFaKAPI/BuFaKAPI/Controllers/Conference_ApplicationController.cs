@@ -74,6 +74,41 @@ namespace BuFaKAPI.Controllers
             return this.Unauthorized();
         }
 
+        [HttpPut("single/")]
+        public async Task<IActionResult> PutSingleConferenceApplication(
+            [FromHeader] string jwttoken,
+            [FromBody] Conference_Application conferenceApplication,
+            [FromQuery] string apikey,
+            [FromRoute] string uid)
+        {
+            if (this.jwtService.PermissionLevelValid(jwttoken, "admin") && this.auth.KeyIsValid(apikey))
+            {
+                Conference_Application ca = this._context.Conference_Application.Where(c => c.ApplicantUID == conferenceApplication.ApplicantUID && c.ConferenceID == conferenceApplication.ConferenceID).FirstOrDefault();
+                this._context.Entry(ca).State = EntityState.Modified;
+
+                try
+                {
+                    await this._context.SaveChangesAsync();
+                }
+                catch (DbUpdateConcurrencyException)
+                {
+                    if (!this.Conference_ApplicationExists(ca.ApplicantUID, ca.ConferenceID))
+                    {
+                        return this.NotFound();
+                    }
+                    else
+                    {
+                        throw;
+                    }
+                }
+
+                return this.Ok();
+            }
+
+            return this.Unauthorized();
+
+        }
+
         // POST: api/Conference_Application
 
         /// <summary>
