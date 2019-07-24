@@ -59,6 +59,14 @@ namespace BuFaKAPI.Controllers
             return this.Unauthorized();
         }
 
+        /// <summary>
+        /// Gets a single Conference_Application
+        /// </summary>
+        /// <param name="jwttoken">Token of the User for Auth</param>
+        /// <param name="conference_id">ID of the conference in Question</param>
+        /// <param name="apikey">API Key for Authentification</param>
+        /// <param name="uid">ID of the User in Question</param>
+        /// <returns>A Conference Application</returns>
         [HttpGet("single/{uid}")]
         public IActionResult GetSingleConferenceApplication(
             [FromHeader(Name = "jwttoken")] string jwttoken,
@@ -74,16 +82,31 @@ namespace BuFaKAPI.Controllers
             return this.Unauthorized();
         }
 
+        /// <summary>
+        /// Puts a single Conference_Application
+        /// </summary>
+        /// <param name="jwttoken">User token for Auth</param>
+        /// <param name="conferenceApplication">Conference Application object to be modified</param>
+        /// <param name="apikey">API Key for Authentification</param>
+        /// <returns>Nothing</returns>
         [HttpPut("single/")]
         public async Task<IActionResult> PutSingleConferenceApplication(
             [FromHeader] string jwttoken,
             [FromBody] Conference_Application conferenceApplication,
-            [FromQuery] string apikey,
-            [FromRoute] string uid)
+            [FromQuery] string apikey)
         {
             if (this.jwtService.PermissionLevelValid(jwttoken, "admin") && this.auth.KeyIsValid(apikey))
             {
                 Conference_Application ca = this._context.Conference_Application.Where(c => c.ApplicantUID == conferenceApplication.ApplicantUID && c.ConferenceID == conferenceApplication.ConferenceID).FirstOrDefault();
+                History history = new History
+                {
+                    OldValue = ca.ToString(),
+                    ResponsibleUID = this.jwtService.GetUIDfromJwtKey(jwttoken),
+                    HistoryType = "Put"
+                };
+                this._context.History.Add(history);
+
+                ca = conferenceApplication;
                 this._context.Entry(ca).State = EntityState.Modified;
 
                 try
