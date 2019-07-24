@@ -146,7 +146,7 @@ namespace BuFaKAPI.Controllers
         /// </summary>
         /// <param name="apikey">API Key for Authentification</param>
         /// <param name="newstatus">Object for Identifying the Conference Application and the to-be-set Status</param>
-        /// <param name="responsibleUID">UID from the editing User</param>
+        /// <param name="jwttoken">UID from the editing User</param>
         /// <returns>401 if api key not valid</returns>
         [HttpPut("status/")]
         public async Task<IActionResult> PutConference_ApplicationStatus(
@@ -186,6 +186,51 @@ namespace BuFaKAPI.Controllers
                 }
 
                 return this.Ok();
+            }
+
+            return this.Unauthorized();
+        }
+
+        [HttpPut("bulkstatus/")]
+        public async Task<IActionResult> PutConference_ApplicationBulkStatus(
+            [FromQuery] string apikey,
+            [FromBody] ChangeCAStatusBulk newstati,
+            [FromHeader(Name = "jwttoken")] string jwttoken,
+            [FromHeader(Name = "conference_id")]int conference_id)
+        {
+            if (this.auth.KeyIsValid(apikey) && this.jwtService.PermissionLevelValid(jwttoken, "admin"))
+            {
+                foreach (string uid in newstati.UIDs)
+                {
+                    var thisca = this._context.Conference_Application.Where(ca => ca.ApplicantUID == uid && ca.ConferenceID == conference_id).FirstOrDefault();
+                    var responsibleUID = this.jwtService.GetUIDfromJwtKey(jwttoken);
+                    History history = new History
+                    {
+                        ResponsibleUID = responsibleUID,
+                        User = this._context.User.FindAsync(responsibleUID).Result,
+                        OldValue = thisca.Status,
+                        HistoryType = "Edit"
+                    };
+                    thisca.Status = this.StatusToString(newstati.NewStatus);
+                    this._context.Entry(thisca).State = EntityState.Modified;
+
+                    try
+                    {
+                        await this._context.SaveChangesAsync();
+                    }
+                    catch (DbUpdateConcurrencyException)
+                    {
+                        if (!this.Conference_ApplicationExists(thisca.ApplicantUID, thisca.ConferenceID))
+                        {
+                            this.telBot.SendTextMessage($"CA for {thisca.ApplicantUID} and {thisca.ConferenceID} not in Database");
+                        }
+                        else
+                        {
+                            throw;
+                        }
+                    }
+                }
+
             }
 
             return this.Unauthorized();
