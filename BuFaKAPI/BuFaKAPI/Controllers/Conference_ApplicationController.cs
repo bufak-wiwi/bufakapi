@@ -231,9 +231,12 @@ namespace BuFaKAPI.Controllers
                     }
                 }
 
+                return this.Ok();
             }
 
             return this.Unauthorized();
+
+
         }
 
         [HttpPut("reRegister")]

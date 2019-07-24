@@ -145,7 +145,29 @@ namespace BuFaKAPI.Controllers
             if (!string.IsNullOrWhiteSpace(uid))
             {
                 List<Conference_Application> applications = this._context.Conference_Application.Where(ca => ca.ApplicantUID == uid).ToList();
+                List<Administrator> admins = this._context.Administrator.Where(a => a.UID == uid).ToList();
                 List<UserForConference> lufc = new List<UserForConference>();
+
+                foreach (Administrator admin in admins)
+                {
+                    if (applications.Any(ap => ap.ApplicantUID == admin.UID && ap.ConferenceID == admin.ConferenceID))
+                    {
+
+                    }
+                    else
+                    {
+                        lufc.Add(new UserForConference
+                        {
+                            Conference_ID = admin.ConferenceID,
+                            Applied = false,
+                            Admin = true,
+                            Attendee = false,
+                            Rejected = false,
+                            Priority = 0
+                        });
+                    }
+                }
+
                 foreach (Conference_Application ca in applications)
                 {
                     UserForConference ufc = new UserForConference
@@ -159,6 +181,7 @@ namespace BuFaKAPI.Controllers
                     };
                     lufc.Add(ufc);
                 }
+
                 result.UserForConference = lufc;
             }
 
