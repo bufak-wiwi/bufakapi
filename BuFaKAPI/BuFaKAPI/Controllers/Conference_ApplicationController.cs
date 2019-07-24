@@ -59,6 +59,21 @@ namespace BuFaKAPI.Controllers
             return this.Unauthorized();
         }
 
+        [HttpGet("single/{uid}")]
+        public IActionResult GetSingleConferenceApplication(
+            [FromHeader(Name = "jwttoken")] string jwttoken,
+            [FromHeader(Name = "conference_id")] int conference_id,
+            [FromQuery] string apikey,
+            [FromRoute] string uid)
+        {
+            if (this.jwtService.PermissionLevelValid(jwttoken, "admin") && this.auth.KeyIsValid(apikey))
+            {
+                return this.Ok(this._context.Conference_Application.Where(ca => ca.ApplicantUID == uid && ca.ConferenceID == conference_id));
+            }
+
+            return this.Unauthorized();
+        }
+
         // POST: api/Conference_Application
 
         /// <summary>
