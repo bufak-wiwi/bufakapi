@@ -97,7 +97,7 @@ namespace BuFaKAPI.Controllers
         {
             if (this.jwtService.PermissionLevelValid(jwttoken, "admin") && this.auth.KeyIsValid(apikey))
             {
-                // await this.InsertHistoryForCAAsync(conferenceApplication.ApplicantUID, conferenceApplication.ConferenceID, jwttoken);
+                await this.InsertHistoryForCAAsync(conferenceApplication.ApplicantUID, conferenceApplication.ConferenceID, jwttoken);
                 this._context.Entry(conferenceApplication).State = EntityState.Modified;
 
                 try
@@ -460,12 +460,14 @@ namespace BuFaKAPI.Controllers
 
         private async Task InsertHistoryForCAAsync(string uid, int conference_id, string jwttoken)
         {
+            Conference_Application ca = this._context.Conference_Application.Where(c => c.ApplicantUID == uid && c.ConferenceID == conference_id).FirstOrDefault();
             History history = new History
             {
-                OldValue = Newtonsoft.Json.JsonConvert.SerializeObject(this._context.Conference_Application.Where(c => c.ApplicantUID == uid && c.ConferenceID == conference_id).FirstOrDefault().ToString()),
+                OldValue = Newtonsoft.Json.JsonConvert.SerializeObject(ca),
                 ResponsibleUID = this.jwtService.GetUIDfromJwtKey(jwttoken),
                 HistoryType = "edit"
             };
+            this._context.Entry(ca).State = EntityState.Detached;
             this._context.History.Add(history);
 
             try
