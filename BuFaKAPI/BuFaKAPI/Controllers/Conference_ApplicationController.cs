@@ -76,7 +76,7 @@ namespace BuFaKAPI.Controllers
         {
             if (this.jwtService.PermissionLevelValid(jwttoken, "admin") && this.auth.KeyIsValid(apikey))
             {
-                return this.Ok(this._context.Conference_Application.Where(ca => ca.ApplicantUID == uid && ca.ConferenceID == conference_id));
+                return this.Ok(this._context.Conference_Application.Where(ca => ca.ApplicantUID == uid && ca.ConferenceID == conference_id).FirstOrDefault());
             }
 
             return this.Unauthorized();

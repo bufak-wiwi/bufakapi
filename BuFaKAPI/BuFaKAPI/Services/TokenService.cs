@@ -63,7 +63,8 @@
             catch (SecurityTokenException)
             {
                 // this.telBot.sendTextMessage($"JWTManager > GetPrincipal: {ex}");
-                throw new SecurityTokenExpiredException();
+                // throw new SecurityTokenExpiredException();
+                return false;
             }
             catch (Exception e)
             {
