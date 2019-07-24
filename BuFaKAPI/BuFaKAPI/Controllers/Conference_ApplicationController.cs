@@ -146,9 +146,9 @@ namespace BuFaKAPI.Controllers
         /// <response code="409">If something went wrong at the Database connection</response>
         [HttpPost]
         public async Task<IActionResult> PostConference_Application(
-                                                                    [FromQuery] string apikey,
-                                                                    [FromBody] IncomingApplication application,
-                                                                    [FromHeader] string jwttoken)
+            [FromQuery] string apikey,
+            [FromBody] IncomingApplication application,
+            [FromHeader] string jwttoken)
         {
             // Permission Level: User
             if (this.jwtService.PermissionLevelValid(jwttoken, "user") && this.auth.KeyIsValid(apikey))
@@ -264,6 +264,15 @@ namespace BuFaKAPI.Controllers
             return this.Unauthorized();
         }
 
+        /// <summary>
+        /// Allows the Admin to Bulk-Update ConferenceApplication Status
+        /// </summary>
+        /// <param name="apikey">API Key for Authentification</param>
+        /// <param name="newstati">Newstati-Object for bulk-updating</param>
+        /// <param name="jwttoken">User Token for Auth</param>
+        /// <param name="conference_id">ID of the Conference in Question</param>
+        /// <returns>Nothing</returns>
+        /// <response code="401">If JWTToken or API Key are invalid</response>
         [HttpPut("bulkstatus/")]
         public async Task<IActionResult> PutConference_ApplicationBulkStatus(
             [FromQuery] string apikey,
@@ -312,12 +321,22 @@ namespace BuFaKAPI.Controllers
 
         }
 
+        /// <summary>
+        /// Allows the admin to change a Conference_Application to another User
+        /// </summary>
+        /// <param name="apikey">API Key for Authentification</param>
+        /// <param name="reregister">ReRegister Object for Updating</param>
+        /// <param name="jwttoken">User Token for Auth</param>
+        /// <param name="conferenceID">ID of the conference in question</param>
+        /// <returns>Nothing</returns>
+        /// <response code="401">If JWTToken or API Key are invalid</response>
+        /// <response code="404">If old Conference_Application is not to be found</response>
         [HttpPut("reRegister")]
         public async Task<IActionResult> ReRegisterConference_Application(
-                                                                          [FromQuery] string apikey,
-                                                                          [FromBody] ReRegister reregister,
-                                                                          [FromHeader(Name = "jwttoken")] string jwttoken,
-                                                                          [FromHeader(Name = "conference_id")] int conferenceID)
+            [FromQuery] string apikey,
+            [FromBody] ReRegister reregister,
+            [FromHeader(Name = "jwttoken")] string jwttoken,
+            [FromHeader(Name = "conference_id")] int conferenceID)
         {
             // Permission Level Admin
             if (this.jwtService.PermissionLevelValid(jwttoken, "admin") && this.auth.KeyIsValid(apikey))
