@@ -11,6 +11,9 @@
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.Options;
 
+    /// <summary>
+    /// Controller for checking if an Applicant is authorized to apply for a conference
+    /// </summary>
     [Route("api/[controller]")]
     [ApiController]
     public class ApplicationAuthsController : ControllerBase
@@ -19,6 +22,12 @@
         private readonly AuthService auth;
         private readonly TokenService jwtService;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ApplicationAuthsController"/> class.
+        /// Constructor for the ApplicationAuthsController
+        /// </summary>
+        /// <param name="context">Context used for the .Net Application</param>
+        /// <param name="settings">Settings</param>
         public ApplicationAuthsController(MyContext context, IOptions<AppSettings> settings)
         {
             this._context = context;
@@ -55,7 +64,6 @@
             }
 
             return this.Unauthorized();
-
         }
 
         private bool ApplicationAuthExists(int id)

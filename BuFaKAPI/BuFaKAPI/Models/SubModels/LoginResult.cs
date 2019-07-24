@@ -25,7 +25,7 @@
     {
         public string TokenString { get; set; }
 
-        public User user { get; set; }
+        public User User { get; set; }
 
         public List<UserForConference> UserForConference { get; set; }
 

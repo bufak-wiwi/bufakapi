@@ -86,7 +86,8 @@
         /// <param name="sensible">Sensible Object to be changed</param>
         /// <param name="apikey">API Key for Authentification</param>
         /// <param name="jwttoken">User Token for Auth</param>
-        /// <returns>401, if API Key is not valid</returns>
+        /// <returns>Nothing</returns>
+        /// <response code="401">If API Key or JWTToken are not valid</response>
         [HttpPut]
         public async Task<IActionResult> PutSensible(
                                                         [FromHeader(Name = "conference_id")] int conference_id,

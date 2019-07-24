@@ -14,15 +14,17 @@
     public class ExportController : ControllerBase
     {
         private readonly MyContext _context;
-        private readonly string apikey;
-        private readonly TelegramBot telBot;
+
+        // private readonly string apikey;
+        // private readonly TelegramBot telBot;
         private readonly AuthService auth;
         private readonly TokenService jwtService;
 
         public ExportController(MyContext context, IOptions<AppSettings> settings)
         {
             this._context = context;
-            this.telBot = new TelegramBot();
+
+            // this.telBot = new TelegramBot();
             this.auth = new AuthService(context);
             this.jwtService = new TokenService(this._context, settings);
         }

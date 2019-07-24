@@ -97,17 +97,8 @@ namespace BuFaKAPI.Controllers
         {
             if (this.jwtService.PermissionLevelValid(jwttoken, "admin") && this.auth.KeyIsValid(apikey))
             {
-                Conference_Application ca = this._context.Conference_Application.Where(c => c.ApplicantUID == conferenceApplication.ApplicantUID && c.ConferenceID == conferenceApplication.ConferenceID).FirstOrDefault();
-                History history = new History
-                {
-                    OldValue = ca.ToString(),
-                    ResponsibleUID = this.jwtService.GetUIDfromJwtKey(jwttoken),
-                    HistoryType = "Put"
-                };
-                this._context.History.Add(history);
-
-                ca = conferenceApplication;
-                this._context.Entry(ca).State = EntityState.Modified;
+                // await this.InsertHistoryForCAAsync(conferenceApplication.ApplicantUID, conferenceApplication.ConferenceID, jwttoken);
+                this._context.Entry(conferenceApplication).State = EntityState.Modified;
 
                 try
                 {
@@ -115,7 +106,7 @@ namespace BuFaKAPI.Controllers
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!this.Conference_ApplicationExists(ca.ApplicantUID, ca.ConferenceID))
+                    if (!this.Conference_ApplicationExists(conferenceApplication.ApplicantUID, conferenceApplication.ConferenceID))
                     {
                         return this.NotFound();
                     }
@@ -129,7 +120,6 @@ namespace BuFaKAPI.Controllers
             }
 
             return this.Unauthorized();
-
         }
 
         // POST: api/Conference_Application
@@ -317,8 +307,6 @@ namespace BuFaKAPI.Controllers
             }
 
             return this.Unauthorized();
-
-
         }
 
         /// <summary>
@@ -468,6 +456,26 @@ namespace BuFaKAPI.Controllers
             var currentSensible = this._context.Sensible.Where(s => s.ConferenceID == sensible.ConferenceID && s.UID == sensible.UID).LastOrDefaultAsync().Result;
 
             return currentSensible.SensibleID;
+        }
+
+        private async Task InsertHistoryForCAAsync(string uid, int conference_id, string jwttoken)
+        {
+            History history = new History
+            {
+                OldValue = Newtonsoft.Json.JsonConvert.SerializeObject(this._context.Conference_Application.Where(c => c.ApplicantUID == uid && c.ConferenceID == conference_id).FirstOrDefault().ToString()),
+                ResponsibleUID = this.jwtService.GetUIDfromJwtKey(jwttoken),
+                HistoryType = "edit"
+            };
+            this._context.History.Add(history);
+
+            try
+            {
+                await this._context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                throw;
+            }
         }
     }
 }
