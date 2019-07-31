@@ -95,77 +95,85 @@
             [FromHeader(Name = "conference_id")] int conference_id,
             [FromQuery] string apikey)
         {
-            if (this.jwtService.PermissionLevelValid(jwtkey, "admin") && this.auth.KeyIsValid(apikey)) {
-                var councils = this._context.Council.Where(c => c.Invalid == false).ToList();
-
-                // List<ApplicationAuth> appAuth = new List<ApplicationAuth>();
-                foreach (Council currentCouncil in councils)
+            if (this.jwtService.PermissionLevelValid(jwtkey, "admin") && this.auth.KeyIsValid(apikey))
+            {
+                if (this._context.ApplicationAuth.Any(aa => aa.Conference_ID == conference_id))
                 {
-                    ApplicationAuth one = new ApplicationAuth
-                    {
-                        Council_ID = currentCouncil.CouncilID,
-                        Conference_ID = conference_id,
-                        Priority = 1,
-                        Password = this.GeneratePassword(),
-                        Used = false,
-                    };
-                    ApplicationAuth two = new ApplicationAuth
-                    {
-                        Council_ID = currentCouncil.CouncilID,
-                        Conference_ID = conference_id,
-                        Priority = 2,
-                        Password = this.GeneratePassword(),
-                        Used = false,
-                    };
-                    ApplicationAuth three = new ApplicationAuth
-                    {
-                        Council_ID = currentCouncil.CouncilID,
-                        Conference_ID = conference_id,
-                        Priority = 3,
-                        Password = this.GeneratePassword(),
-                        Used = false,
-                    };
-                    ApplicationAuth four = new ApplicationAuth
-                    {
-                        Council_ID = currentCouncil.CouncilID,
-                        Conference_ID = conference_id,
-                        Priority = 4,
-                        Password = this.GeneratePassword(),
-                        Used = false,
-                    };
-                    ApplicationAuth five = new ApplicationAuth
-                    {
-                        Council_ID = currentCouncil.CouncilID,
-                        Conference_ID = conference_id,
-                        Priority = 5,
-                        Password = this.GeneratePassword(),
-                        Used = false,
-                    };
-                    ApplicationAuth six = new ApplicationAuth
-                    {
-                        Council_ID = currentCouncil.CouncilID,
-                        Conference_ID = conference_id,
-                        Priority = 6,
-                        Password = this.GeneratePassword(),
-                        Used = false,
-                    };
-                    this._context.Add(one);
-                    this._context.Add(two);
-                    this._context.Add(three);
-                    this._context.Add(four);
-                    this._context.Add(five);
-                    this._context.Add(six);
-                    try
-                    {
-                        await this._context.SaveChangesAsync();
-                    }
-                    catch (DbUpdateConcurrencyException)
-                    {
-                        this.telBot.SendTextMessage($"Error at generating passwords for {currentCouncil.CouncilID}, {currentCouncil.Name} - {currentCouncil.University}");
-                    }
+                    return this.NoContent();
                 }
+                else
+                {
+                    var councils = this._context.Council.Where(c => c.Invalid == false).ToList();
 
-                return this.Ok();
+                    // List<ApplicationAuth> appAuth = new List<ApplicationAuth>();
+                    foreach (Council currentCouncil in councils)
+                    {
+                        ApplicationAuth one = new ApplicationAuth
+                        {
+                            Council_ID = currentCouncil.CouncilID,
+                            Conference_ID = conference_id,
+                            Priority = 1,
+                            Password = this.GeneratePassword(),
+                            Used = false,
+                        };
+                        ApplicationAuth two = new ApplicationAuth
+                        {
+                            Council_ID = currentCouncil.CouncilID,
+                            Conference_ID = conference_id,
+                            Priority = 2,
+                            Password = this.GeneratePassword(),
+                            Used = false,
+                        };
+                        ApplicationAuth three = new ApplicationAuth
+                        {
+                            Council_ID = currentCouncil.CouncilID,
+                            Conference_ID = conference_id,
+                            Priority = 3,
+                            Password = this.GeneratePassword(),
+                            Used = false,
+                        };
+                        ApplicationAuth four = new ApplicationAuth
+                        {
+                            Council_ID = currentCouncil.CouncilID,
+                            Conference_ID = conference_id,
+                            Priority = 4,
+                            Password = this.GeneratePassword(),
+                            Used = false,
+                        };
+                        ApplicationAuth five = new ApplicationAuth
+                        {
+                            Council_ID = currentCouncil.CouncilID,
+                            Conference_ID = conference_id,
+                            Priority = 5,
+                            Password = this.GeneratePassword(),
+                            Used = false,
+                        };
+                        ApplicationAuth six = new ApplicationAuth
+                        {
+                            Council_ID = currentCouncil.CouncilID,
+                            Conference_ID = conference_id,
+                            Priority = 6,
+                            Password = this.GeneratePassword(),
+                            Used = false,
+                        };
+                        this._context.Add(one);
+                        this._context.Add(two);
+                        this._context.Add(three);
+                        this._context.Add(four);
+                        this._context.Add(five);
+                        this._context.Add(six);
+                        try
+                        {
+                            await this._context.SaveChangesAsync();
+                        }
+                        catch (DbUpdateConcurrencyException)
+                        {
+                            this.telBot.SendTextMessage($"Error at generating passwords for {currentCouncil.CouncilID}, {currentCouncil.Name} - {currentCouncil.University}");
+                        }
+                    }
+
+                    return this.Ok();
+                }
             }
 
             return this.Unauthorized();
