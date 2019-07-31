@@ -11,6 +11,10 @@
     /// </summary>
     public class ApplicationAuth
     {
+
+        /// <summary>
+        /// Gets or sets the ID of the Data
+        /// </summary>
         [Key]
         public int ID { get; set; }
         /// <summary>
@@ -32,5 +36,10 @@
         /// Gets or sets the Password for the combination of the Values above
         /// </summary>
         public string Password { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether the Password is already used
+        /// </summary>
+        public bool Used { get; set; }
     }
 }

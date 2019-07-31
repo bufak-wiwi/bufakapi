@@ -246,6 +246,7 @@
 
                 return this.Ok(conf);
             }
+
             return this.Unauthorized();
         }
 
