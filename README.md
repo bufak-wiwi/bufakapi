@@ -78,21 +78,21 @@ this file contains your Firebase Admin SDK Keyfile
 
 ## Deploying with Release configuration
 * edit the kestrel.service file under /etc/systemd/system/kestrel.service
-** uncomment the line with Release and comment the Development line
-** save the file
+  * uncomment the line with Release and comment the Development line
+  * save the file
 * edit the api-build script under /usr/local/bin
-** uncomment the line with dotnet publish Release
-** comment the line with dotnet publish Debug
-** save the file
+  * uncomment the line with dotnet publish Release
+  * comment the line with dotnet publish Debug
+  * save the file
 * write `systemctl daemon-reload`
 * then start the script `api-build`
 ## Deploying with Development configuration
 * edit the kestrel.service file under /etc/systemd/system/kestrel.service
-** comment the line with Release and uncomment the Development line
-** save the file
+  * comment the line with Release and uncomment the Development line
+  * save the file
 * edit the api-build script under /usr/local/bin
-** comment the line with dotnet publish Release
-** uncomment the line with dotnet publish Debug
-** save the file
+  * comment the line with dotnet publish Release
+  * uncomment the line with dotnet publish Debug
+  * save the file
 * write `systemctl daemon-reload`
 * then start the script `api-build`
