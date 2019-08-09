@@ -59,13 +59,11 @@
             [FromHeader(Name = "jwttoken")] string jwttoken,
             [FromHeader(Name = "conference_id")] int conference_id)
         {
-            this.telBot.SendTextMessage(jwttoken);
             if (this.auth.KeyIsValid(apikey) && this.jwtService.PermissionLevelValid(jwttoken, "user"))
             {
                 var authForConf = this._context.ApplicationAuth.Where(a => a.Conference_ID == conference_id
                                                                         && a.Council_ID == applicationAuth.Council_ID
                                                                         && a.Password == applicationAuth.Password).FirstOrDefault();
-                this.telBot.SendTextMessage($"{conference_id}, {Newtonsoft.Json.JsonConvert.SerializeObject(applicationAuth)}, {jwttoken}");
                 if (authForConf == null)
                 {
                     var authForConfOtherKey = this._context.ApplicationAuth.Where(a => a.Conference_ID == conference_id
