@@ -13,6 +13,11 @@
     using Microsoft.Extensions.Options;
     using WebApplication1.Models;
 
+    public class OtherKeys
+    {
+        public int OtherKeysCount { get; set; }
+    }
+
     /// <summary>
     /// Controller for checking if an Applicant is authorized to apply for a conference
     /// </summary>
@@ -63,7 +68,15 @@
                 this.telBot.SendTextMessage($"{conference_id}, {Newtonsoft.Json.JsonConvert.SerializeObject(applicationAuth)}, {jwttoken}");
                 if (authForConf == null)
                 {
-                    return this.Ok(new { PasswordFound = false, Priority = 0 });
+                    var authForConfOtherKey = this._context.ApplicationAuth.Where(a => a.Conference_ID == conference_id
+                                                                        && a.Council_ID == 0
+                                                                        && a.Password == applicationAuth.Password).FirstOrDefault();
+                    if (authForConfOtherKey == null)
+                    {
+                        return this.Ok(new { PasswordFound = false, Priority = 0 });
+                    }
+
+                    return this.Ok(new { PasswordFound = true, Prioriy = authForConfOtherKey.Priority, IsOtherKey = true });
                 }
                 else
                 {
@@ -87,14 +100,16 @@
         /// <summary>
         /// generates passwords for the councils
         /// </summary>
-        /// <param name="jwtkey"></param>
-        /// <param name="conference_id"></param>
-        /// <param name="apikey"></param>
+        /// <param name="jwttoken">User token for Authentification</param>
+        /// <param name="conference_id">ID of the current Conference</param>
+        /// <param name="otherKeys">The Count of Out-of-council keys to create</param>
+        /// <param name="apikey">API Key for Authentification</param>
         /// <returns>Nothing</returns>
         [HttpPut("generate/")]
         public async Task<IActionResult> GeneratePasswordsForCouncils(
             [FromHeader(Name = "jwtkey")] string jwttoken,
             [FromHeader(Name = "conference_id")] int conference_id,
+            [FromBody] OtherKeys otherKeys,
             [FromQuery] string apikey)
         {
             if (this.jwtService.PermissionLevelValid(jwttoken, "admin") && this.auth.KeyIsValid(apikey))
@@ -171,6 +186,27 @@
                         catch (DbUpdateConcurrencyException)
                         {
                             this.telBot.SendTextMessage($"Error at generating passwords for {currentCouncil.CouncilID}, {currentCouncil.Name} - {currentCouncil.University}");
+                        }
+                    }
+
+                    for (int i = 0; i <= otherKeys.OtherKeysCount; i++)
+                    {
+                        ApplicationAuth key = new ApplicationAuth
+                        {
+                            Council_ID = 0,
+                            Conference_ID = conference_id,
+                            Priority = 1,
+                            Password = this.GeneratePassword(),
+                            Used = false,
+                        };
+                        this._context.Add(key);
+                        try
+                        {
+                            await this._context.SaveChangesAsync();
+                        }
+                        catch (DbUpdateConcurrencyException)
+                        {
+                            this.telBot.SendTextMessage($"Error at generating otherKey");
                         }
                     }
 
