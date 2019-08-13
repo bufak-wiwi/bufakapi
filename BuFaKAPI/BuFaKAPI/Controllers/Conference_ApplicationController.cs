@@ -206,7 +206,6 @@ namespace BuFaKAPI.Controllers
                     }
                 }
 
-                telBot.SendTextMessage($"{}")
                 await this.TickUsedForApplicationKey(application.Key, application.ConferenceID);
 
                 return this.CreatedAtAction("GetConference_Application", new { id = cf.ConferenceID }, cf);
