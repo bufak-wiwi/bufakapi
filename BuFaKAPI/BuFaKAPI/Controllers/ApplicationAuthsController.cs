@@ -63,12 +63,15 @@
             {
                 var authForConf = this._context.ApplicationAuth.Where(a => a.Conference_ID == conference_id
                                                                         && a.Council_ID == applicationAuth.Council_ID
-                                                                        && a.Password == applicationAuth.Password).FirstOrDefault();
+                                                                        && a.Password == applicationAuth.Password
+                                                                        && a.Used == false).FirstOrDefault();
+
                 if (authForConf == null)
                 {
                     var authForConfOtherKey = this._context.ApplicationAuth.Where(a => a.Conference_ID == conference_id
                                                                         && a.Council_ID == 0
-                                                                        && a.Password == applicationAuth.Password).FirstOrDefault();
+                                                                        && a.Password == applicationAuth.Password
+                                                                        && a.Used == false).FirstOrDefault();
                     if (authForConfOtherKey == null)
                     {
                         return this.Ok(new { PasswordFound = false, Priority = 0 });
@@ -78,16 +81,6 @@
                 }
                 else
                 {
-                    authForConf.Used = true;
-                    try
-                    {
-                        await this._context.SaveChangesAsync();
-                    }
-                    catch (DbUpdateConcurrencyException e)
-                    {
-                        this.telBot.SendTextMessage(e.ToString());
-                    }
-
                     return this.Ok(new { PasswordFound = true, Prioriy = authForConf.Priority });
                 }
             }

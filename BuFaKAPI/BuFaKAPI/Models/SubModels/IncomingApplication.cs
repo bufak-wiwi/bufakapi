@@ -84,5 +84,10 @@
         /// </summary>
         [EnumDataType(typeof(CAStatus))]
         public CAStatus Status { get; set; }
+
+        /// <summary>
+        /// Gets or sets the Used Key for this Application
+        /// </summary>
+        public string Key { get; set; }
     }
 }

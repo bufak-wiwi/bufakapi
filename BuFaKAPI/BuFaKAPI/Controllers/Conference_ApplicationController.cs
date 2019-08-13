@@ -206,6 +206,8 @@ namespace BuFaKAPI.Controllers
                     }
                 }
 
+                await this.TickUsedForApplicationKey(application.Key, application.ConferenceID);
+
                 return this.CreatedAtAction("GetConference_Application", new { id = cf.ConferenceID }, cf);
             }
 
@@ -479,6 +481,22 @@ namespace BuFaKAPI.Controllers
             this._context.Entry(ca).State = EntityState.Detached;
             this._context.History.Add(history);
 
+            try
+            {
+                await this._context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                throw;
+            }
+        }
+
+        private async Task TickUsedForApplicationKey(string key, int conference_id)
+        {
+            var currentKey = this._context.ApplicationAuth.Where(aa => aa.Password == key
+                                                            && aa.Conference_ID == conference_id).FirstOrDefault();
+            currentKey.Used = true;
+            this._context.Entry(currentKey).State = EntityState.Modified;
             try
             {
                 await this._context.SaveChangesAsync();
