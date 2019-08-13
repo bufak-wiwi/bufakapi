@@ -206,6 +206,7 @@ namespace BuFaKAPI.Controllers
                     }
                 }
 
+                telBot.SendTextMessage($"{}")
                 await this.TickUsedForApplicationKey(application.Key, application.ConferenceID);
 
                 return this.CreatedAtAction("GetConference_Application", new { id = cf.ConferenceID }, cf);
@@ -393,22 +394,22 @@ namespace BuFaKAPI.Controllers
         {
             if (castatus == CAStatus.HasApplied)
             {
-                this.telBot.SendTextMessage("CAStatus equals 0");
+                // this.telBot.SendTextMessage("CAStatus equals 0");
                 return "HasApplied";
             }
             else if (castatus == CAStatus.IsRejected)
             {
-                this.telBot.SendTextMessage("CAStatus equals 1");
+                // this.telBot.SendTextMessage("CAStatus equals 1");
                 return "IsRejected";
             }
             else if (castatus == CAStatus.IsAttendee)
             {
-                this.telBot.SendTextMessage("CAStatus equals 2");
+                // this.telBot.SendTextMessage("CAStatus equals 2");
                 return "IsAttendee";
             }
             else
             {
-                this.telBot.SendTextMessage("CAStatus not valid");
+                // this.telBot.SendTextMessage("CAStatus not valid");
                 return null;
             }
         }
