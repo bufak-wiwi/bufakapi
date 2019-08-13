@@ -52,8 +52,15 @@ namespace BuFaKAPI.Controllers
             // Permission Level: Admin
             if (this.jwtService.PermissionLevelValid(jwttoken, "admin") && this.auth.KeyIsValid(apikey, conference_id))
             {
-                var users = this._context.Conference_Application.Where(c => c.ConferenceID == conference_id);
-                return this.Ok(users);
+                var applications = this._context.Conference_Application.Where(c => c.ConferenceID == conference_id);
+
+                foreach (Conference_Application application in applications)
+                {
+                    application.Sensible = this._context.Sensible.FindAsync(application.SensibleID).Result;
+                    application.User = this._context.User.FindAsync(application.ApplicantUID).Result;
+                }
+
+                return this.Ok(applications);
             }
 
             return this.Unauthorized();
