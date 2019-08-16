@@ -89,5 +89,10 @@
         /// Gets or sets the Used Key for this Application
         /// </summary>
         public string Key { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether the User is of the BuFaK Council
+        /// </summary>
+        public bool Newsletter { get; set; }
     }
 }

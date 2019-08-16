@@ -157,6 +157,11 @@ namespace BuFaKAPI.Controllers
                     return this.BadRequest(this.ModelState);
                 }
 
+                if (application.Newsletter)
+                {
+                    await this.InsertNewNewsletterAsync(this._context.User.FindAsync(application.ApplicantUID).Result);
+                }
+
                 Sensible sensible = new Sensible
                 {
                     BuFaKCount = application.Count,
@@ -430,6 +435,27 @@ namespace BuFaKAPI.Controllers
             else
             {
                 throw new InvalidDataException();
+            }
+        }
+
+        private async Task InsertNewNewsletterAsync(User user)
+        {
+            Newsletter nl = new Newsletter
+            {
+                Name = user.Name,
+                Surname = user.Surname,
+                Email = user.Email,
+                Sex = user.Sex,
+                Studyplace = this._context.Council.FindAsync(user.CouncilID).Result.City,
+            };
+            await this._context.Newsletter.AddAsync(nl);
+            try
+            {
+                await this._context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                throw;
             }
         }
 
