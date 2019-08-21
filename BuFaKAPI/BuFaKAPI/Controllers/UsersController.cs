@@ -350,7 +350,7 @@ namespace BuFaKAPI.Controllers
                     };
 
                     string token = this.jwtService.CreateKey(user.UID);
-                    this.telBot.SendTextMessage($"User Created, Name: {user.Surname} {user.Name}");
+                    this.telBot.SendTextMessage($"User Created, Name: {user.Name} {user.Surname} ");
                     var userreturn = new
                     {
                         User = user,

@@ -195,6 +195,8 @@ namespace BuFaKAPI.Controllers
                     Sensible = this._context.Sensible.FindAsync(sensibleID).Result
                 };
                 this._context.Conference_Application.Add(cf);
+                User user = this._context.User.Where(u => u.UID == application.ApplicantUID).AsNoTracking().FirstOrDefault();
+                this.telBot.SendTextMessage($"User Applied - Name {user.Name} {user.Surname}");
                 try
                 {
                     await this._context.SaveChangesAsync();
