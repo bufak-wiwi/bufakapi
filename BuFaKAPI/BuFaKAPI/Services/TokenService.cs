@@ -8,6 +8,7 @@
     using System.Text;
     using System.Threading.Tasks;
     using BuFaKAPI.Models;
+    using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.Options;
     using Microsoft.IdentityModel.Tokens;
     using WebApplication1.Models;
@@ -98,6 +99,7 @@
         public bool PermissionLevelValid(string token, string level)
         {
             string uid = this.GetUIDfromJwtKey(token);
+            this._context.ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking;
             User user = this._context.User.Find(uid);
 
             if (level == "user")

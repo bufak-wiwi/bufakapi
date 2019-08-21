@@ -277,7 +277,7 @@ namespace BuFaKAPI.Controllers
 
                         try
                         {
-                            await this._context.SaveChangesAsync();
+                            this._context.SaveChanges();
                         }
                         catch (DbUpdateConcurrencyException)
                         {
