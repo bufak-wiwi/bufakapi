@@ -56,8 +56,8 @@ namespace BuFaKAPI.Controllers
 
                 foreach (Conference_Application application in applications)
                 {
-                    application.Sensible = this._context.Sensible.FindAsync(application.SensibleID).Result;
-                    application.User = this._context.User.FindAsync(application.ApplicantUID).Result;
+                    application.Sensible = this._context.Sensible.Find(application.SensibleID);
+                    application.User = this._context.User.Find(application.ApplicantUID);
                 }
 
                 return this.Ok(applications);

@@ -99,34 +99,25 @@
         public bool PermissionLevelValid(string token, string level)
         {
             string uid = this.GetUIDfromJwtKey(token);
-            this._context.ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking;
-            User user = this._context.User.Find(uid);
 
             if (level == "user")
             {
-                if (this.ValidateJwtKey(token))
-                {
-                    return true;
-                }
-
-                return false;
+                return this.ValidateJwtKey(token);
             }
             else if (level == "admin")
             {
-                if (this.ValidateJwtKey(token) && this._context.Administrator.Any(a => a.UID == uid))
-                {
-                    return true;
-                }
-
-                return false;
+                return this.ValidateJwtKey(token) && this._context.Administrator.Any(a => a.UID == uid);
             }
             else if (level == "superadmin")
             {
+                User user = this._context.User.Find(uid);
                 if (this.ValidateJwtKey(token) && user.IsSuperAdmin)
                 {
+                    this._context.Entry(user).State = EntityState.Detached;
                     return true;
                 }
 
+                this._context.Entry(user).State = EntityState.Detached;
                 return false;
             }
 
