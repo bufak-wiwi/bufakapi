@@ -196,7 +196,7 @@
         }
 
         // DELETE: api/Workshops/5
-        /*
+
         /// <summary>
         /// Deletes a specific Workshop
         /// </summary>
@@ -206,9 +206,11 @@
         /// <response code="400">Bad Request if model is not valid</response>
         /// <response code="401">Unauthorized if API Key not valid</response>
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteWorkshop([FromRoute] int id, [FromQuery] string apikey)
+        public async Task<IActionResult> DeleteWorkshop([FromRoute] int id, 
+                                                        [FromQuery] string apikey, 
+                                                        [FromHeader] string jwttoken)
         {
-            if (this.auth.KeyIsValid(apikey))
+            if (this.jwtService.PermissionLevelValid(jwttoken, "admin") && this.auth.KeyIsValid(apikey))
             {
                 if (!this.ModelState.IsValid)
                 {
@@ -216,20 +218,40 @@
                 }
 
                 var workshop = await this._context.Workshop.FindAsync(id);
-                if (workshop == null)
+                var uid = this.jwtService.GetUIDfromJwtKey(jwttoken);
+                if (!this._context.Administrator.Any(a => a.UID == uid && a.ConferenceID == workshop.ConferenceID))
+                {
+                    return this.Unauthorized();
+                }
+
+                if (workshop == null || workshop.Invalid)
                 {
                     return this.NotFound();
                 }
 
-                this._context.Workshop.Remove(workshop);
-                await this._context.SaveChangesAsync();
+                workshop.Invalid = true;
+                this._context.Entry(workshop).State = EntityState.Modified;
+                try
+                {
+                    await this._context.SaveChangesAsync();
+                }
+                catch (DbUpdateConcurrencyException)
+                {
+                    if (!this.WorkshopExists(id))
+                    {
+                        return this.NotFound();
+                    }
+                    else
+                    {
+                        throw;
+                    }
+                }
 
                 return this.Ok(workshop);
             }
 
             return this.Unauthorized();
         }
-        */
 
         private bool WorkshopExists(int id)
         {
