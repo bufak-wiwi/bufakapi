@@ -79,7 +79,7 @@
                     return this.BadRequest(this.ModelState);
                 }
 
-                if (workshop == null)
+                if (workshop == null || workshop.Invalid)
                 {
                     return this.NotFound();
                 }
