@@ -46,7 +46,7 @@
             // Permission Level User
             if (this.jwtService.PermissionLevelValid(jwttoken, "user") && this.auth.KeyIsValid(apikey, conference_id))
             {
-                return this.Ok(this._context.Workshop.Where(ws => ws.ConferenceID == conference_id));
+                return this.Ok(this._context.Workshop.Where(ws => ws.ConferenceID == conference_id && !ws.Invalid));
             }
 
             return this.Unauthorized();
