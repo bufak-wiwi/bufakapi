@@ -15,7 +15,7 @@
     {
         public bool ConferenceApplicationPhase { get; set; }
 
-        public bool WorkshopApplicatonPhase { get; set; }
+        public bool WorkshopApplicationPhase { get; set; }
 
         public bool WorkshopSuggestionPhase { get; set; }
     }
@@ -223,7 +223,7 @@
             {
                 Conference conf = this._context.Conference.FindAsync(conference_id).Result;
                 conf.ConferenceApplicationPhase = conferencephases.ConferenceApplicationPhase;
-                conf.WorkshopApplicationPhase = conferencephases.WorkshopApplicatonPhase;
+                conf.WorkshopApplicationPhase = conferencephases.WorkshopApplicationPhase;
                 conf.WorkshopSuggestionPhase = conferencephases.WorkshopSuggestionPhase;
 
                 this._context.Entry(conf).State = EntityState.Modified;
