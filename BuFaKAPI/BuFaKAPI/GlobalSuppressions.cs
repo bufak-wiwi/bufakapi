@@ -126,4 +126,5 @@
 [assembly: System.Diagnostics.CodeAnalysis.SuppressMessage("StyleCop.CSharp.ReadabilityRules", "SA1101:Prefix local calls with this", Justification = "<Ausstehend>", Scope = "member", Target = "~M:BuFaKAPI.Controllers.NewslettersController.#ctor(BuFaKAPI.Models.MyContext)")]
 [assembly: System.Diagnostics.CodeAnalysis.SuppressMessage("StyleCop.CSharp.NamingRules", "SA1309:Field names must not begin with underscore", Justification = "<Ausstehend>", Scope = "member", Target = "~F:BuFaKAPI.Services.TokenService._context")]
 [assembly: System.Diagnostics.CodeAnalysis.SuppressMessage("StyleCop.CSharp.NamingRules", "SA1309:Field names must not begin with underscore", Justification = "<Ausstehend>", Scope = "member", Target = "~F:BuFaKAPI.Controllers.ApplicationAuthsController._context")]
+[assembly: System.Diagnostics.CodeAnalysis.SuppressMessage("StyleCop.CSharp.MaintainabilityRules", "SA1402:File may only contain a single class", Justification = "<Ausstehend>", Scope = "type", Target = "~T:BuFaKAPI.Models.SubModels.UserToWS")]
 

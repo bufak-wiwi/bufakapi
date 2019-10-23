@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.IO;
     using System.Linq;
     using System.Threading.Tasks;
     using BuFaKAPI.Models;
@@ -239,6 +240,7 @@
                         WorkshopID = application.Workshop_ID,
                         Workshop = workshop,
                         Priority = application.Priority,
+                        Status = "HasApplied",
                     };
                     this._context.Workshop_Application.Add(wa);
                 }
@@ -267,6 +269,99 @@
             }
 
             return this.Unauthorized();
+        }
+
+        [HttpPut("bulkstatus/")]
+        public async Task<IActionResult> PutWorkshop_ApplicationBulkStatus(
+            [FromQuery] string apikey,
+            [FromBody] ChangeWAStatusBulk newstati,
+            [FromHeader(Name = "jwttoken")] string jwttoken,
+            [FromHeader(Name = "conference_id")] int conference_id)
+        {
+            if (this.auth.KeyIsValid(apikey) && this.jwtService.PermissionLevelValid(jwttoken, "admin"))
+            {
+                var count = 0;
+                foreach (UserToWS utw in newstati.UsersToWorkshop)
+                {
+                    var thisWA = this._context.Workshop_Application.Where(wa => wa.ApplicantUID == utw.UID && wa.WorkshopID == utw.WorkshopID).FirstOrDefault();
+                    thisWA.Status = this.StatusToString(newstati.NewStatus);
+                    this._context.Entry(thisWA).State = EntityState.Modified;
+
+                    try
+                    {
+                        await this._context.SaveChangesAsync();
+                        count += 1;
+                    }
+                    catch (DbUpdateConcurrencyException)
+                    {
+                        if (!this.Workshop_ApplicationExists(thisWA.WorkshopID, thisWA.ApplicantUID))
+                        {
+                            this.telBot.SendTextMessage($"WA for {thisWA.ApplicantUID} and {thisWA.WorkshopID} not in Database");
+                        }
+                        else
+                        {
+                            throw;
+                        }
+                    }
+                }
+
+                this.telBot.SendTextMessage($"Successfully changed Status of {count} Workshop Applications to {newstati.NewStatus}");
+                return this.Ok();
+            }
+
+            return this.Unauthorized();
+        }
+
+        private string StatusToString(WAStatus wastatus)
+        {
+            if (wastatus == WAStatus.HasApplied)
+            {
+                // this.telBot.SendTextMessage("CAStatus equals 0");
+                return "HasApplied";
+            }
+            else if (wastatus == WAStatus.IsRejected)
+            {
+                // this.telBot.SendTextMessage("CAStatus equals 1");
+                return "IsRejected";
+            }
+            else if (wastatus == WAStatus.IsAttendee)
+            {
+                // this.telBot.SendTextMessage("CAStatus equals 2");
+                return "IsAttendee";
+            }
+            else if (wastatus == WAStatus.IsPlanned)
+            {
+                return "IsPlanned";
+            }
+            else
+            {
+                // this.telBot.SendTextMessage("CAStatus not valid");
+                return null;
+            }
+        }
+
+        private WAStatus StatusToObject(string wastatus)
+        {
+            if (wastatus.Equals("IsRejected"))
+            {
+                return WAStatus.IsRejected;
+            }
+            else if (wastatus.Equals("IsAttendee"))
+            {
+                return WAStatus.IsAttendee;
+            }
+            else if (wastatus.Equals("HasApplied"))
+            {
+                return WAStatus.HasApplied;
+            }
+            else if (wastatus.Equals("IsPlanned"))
+            {
+                return WAStatus.IsPlanned;
+            }
+            else
+            {
+                throw new InvalidDataException();
+            }
         }
 
         private bool Workshop_ApplicationExists(int workshop_id, string uid)
