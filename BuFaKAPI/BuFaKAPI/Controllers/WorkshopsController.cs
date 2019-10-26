@@ -5,6 +5,7 @@
     using System.Linq;
     using System.Threading.Tasks;
     using BuFaKAPI.Models;
+    using BuFaKAPI.Models.SubModels;
     using BuFaKAPI.Services;
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Mvc;
@@ -46,7 +47,26 @@
             // Permission Level User
             if (this.jwtService.PermissionLevelValid(jwttoken, "user") && this.auth.KeyIsValid(apikey, conference_id))
             {
-                return this.Ok(this._context.Workshop.Where(ws => ws.ConferenceID == conference_id && !ws.Invalid));
+                List<Workshop> workshops = this._context.Workshop.Where(ws => ws.ConferenceID == conference_id && !ws.Invalid).ToList();
+                List<WorkshopList> wsexport = new List<WorkshopList>();
+                foreach (Workshop ws in workshops)
+                {
+                    WorkshopList wsexportitem = new WorkshopList
+                    {
+                        WorkshopID = ws.WorkshopID,
+                        Name = ws.Name,
+                        HostName = ws.HostName,
+                        Place = ws.Place,
+                        Start = ws.Start,
+                        MaxVisitors = ws.MaxVisitors,
+                        MaterialNote = ws.MaterialNote,
+                        Overview = ws.Overview,
+                        Applicants = this._context.Workshop_Application.Where(wa => wa.WorkshopID == ws.WorkshopID).ToList().Count
+                    };
+                    wsexport.Add(wsexportitem);
+                }
+
+                return this.Ok(wsexport);
             }
 
             return this.Unauthorized();
