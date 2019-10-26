@@ -84,6 +84,11 @@
             if (this.jwtService.PermissionLevelValid(jwttoken, "user") && this.auth.KeyIsValid(apikey, conference_id))
             {
                 List<Workshop_Application> wa = this._context.Workshop_Application.Where(w => w.ApplicantUID == uid).ToList();
+                foreach (Workshop_Application w in wa)
+                {
+                    w.Workshop = this._context.Workshop.Find(w.WorkshopID);
+                }
+
                 return this.Ok(wa);
             }
 
