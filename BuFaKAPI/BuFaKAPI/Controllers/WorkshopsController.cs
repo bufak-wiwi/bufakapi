@@ -58,7 +58,7 @@
         /// Gets one specific Workshop-Object from the API
         /// </summary>
         /// <param name="id">ID of the Workshop to be Get</param>
-        /// <param name="jwttoken"></param>
+        /// <param name="jwttoken">JWT Token for User Auth</param>
         /// <param name="apikey">API Key for Authentification</param>
         /// <returns>Workshop-Object on Success</returns>
         /// <response code="400">Bad Request if ModelState is not valid</response>
@@ -84,7 +84,8 @@
                     return this.NotFound();
                 }
 
-                return this.Ok(workshop);
+                var applications = this._context.Workshop_Application.Where(wa => wa.WorkshopID == workshop.WorkshopID);
+                return this.Ok(new { Workshop = workshop, Applications = applications });
             }
 
             return this.Unauthorized();
@@ -200,8 +201,8 @@
         /// <summary>
         /// Deletes a specific Workshop
         /// </summary>
-        /// <param Name="id">Id of the Workshop to be deleted</param>
-        /// <param Name="apikey">API Key for Authentification</param>
+        /// <param name="id">Id of the Workshop to be deleted</param>
+        /// <param name="apikey">API Key for Authentification</param>
         /// <returns>200 OK for Success</returns>
         /// <response code="400">Bad Request if model is not valid</response>
         /// <response code="401">Unauthorized if API Key not valid</response>
