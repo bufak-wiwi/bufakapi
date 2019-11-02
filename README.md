@@ -96,3 +96,6 @@ this file contains your Firebase Admin SDK Keyfile
   * save the file
 * write `systemctl daemon-reload`
 * then start the script `api-build`
+
+## Database structure
+The Database Structure lies inside a .sql-file inside the project folder
