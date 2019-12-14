@@ -47,7 +47,8 @@
             if (response.IsSuccessStatusCode)
             {
                 var responseString = await response.Content.ReadAsStringAsync();
-                await this.authProvider.SendEmailVerificationAsync(token);
+
+            // this.authProvider.SendEmailVerificationAsync(token);
                 return responseString;
             }
             else if ((int)response.StatusCode == 302)
