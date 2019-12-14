@@ -83,12 +83,14 @@
             // Permission Level User
             if (this.jwtService.PermissionLevelValid(jwttoken, "user") && this.auth.KeyIsValid(apikey, conference_id))
             {
+                this.telBot.SendTextMessage("No security Issues");
                 List<Workshop_Application> wa = this._context.Workshop_Application.Where(w => w.ApplicantUID == uid).ToList();
                 foreach (Workshop_Application w in wa)
                 {
                     w.Workshop = this._context.Workshop.Find(w.WorkshopID);
                 }
 
+                this.telBot.SendTextMessage(wa.ToString());
                 return this.Ok(wa);
             }
 
