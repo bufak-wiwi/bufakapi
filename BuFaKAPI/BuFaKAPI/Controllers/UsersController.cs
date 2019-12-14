@@ -274,6 +274,7 @@ namespace BuFaKAPI.Controllers
                         }
 
                         this._context.Entry(user).State = EntityState.Modified;
+                        this._context.Entry(user).Property(e => e.IsSuperAdmin).IsModified = false;
 
                         try
                         {
