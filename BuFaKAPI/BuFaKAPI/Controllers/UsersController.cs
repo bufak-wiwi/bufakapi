@@ -305,6 +305,50 @@ namespace BuFaKAPI.Controllers
         }
 
         /// <summary>
+        /// Changes the IsSuperAdmin Flag of a User to a wanted state
+        /// </summary>
+        /// <param name="uid">UID of the User to change</param>
+        /// <param name="jwttoken">jwttoken of the user doing the change</param>
+        /// <param name="isSuperAdmin">the flag to be set</param>
+        /// <returns>Nothing if succeeded</returns>
+        [HttpPut("{id}")]
+        public async Task<IActionResult> ChangeUserRole(
+                [FromQuery] string uid,
+                [FromHeader] string jwttoken,
+                [FromBody] bool isSuperAdmin)
+        {
+            // Permission Level SuperAdmin
+            if (this.jwtService.PermissionLevelValid(jwttoken, "superadmin"))
+            {
+                var user = this._context.User.Find(uid);
+
+                user.IsSuperAdmin = isSuperAdmin;
+
+                this._context.Entry(user).State = EntityState.Modified;
+
+                try
+                {
+                    this._context.SaveChanges();
+                }
+                catch (DbUpdateConcurrencyException)
+                {
+                    if (!this.UserExists(uid))
+                    {
+                        return this.NotFound();
+                    }
+                    else
+                    {
+                        throw;
+                    }
+                }
+
+                return this.Ok();
+            }
+
+            return this.Unauthorized();
+        }
+
+        /// <summary>
         /// Adds a new User to the Database, with Firebase entry
         /// </summary>
         /// <param name="userWithPassword">User Object to be parsed and added</param>
