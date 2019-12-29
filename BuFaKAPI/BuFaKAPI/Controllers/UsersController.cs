@@ -311,7 +311,7 @@ namespace BuFaKAPI.Controllers
         /// <param name="jwttoken">jwttoken of the user doing the change</param>
         /// <param name="isSuperAdmin">the flag to be set</param>
         /// <returns>Nothing if succeeded</returns>
-        [HttpPut("{id}")]
+        [HttpPut("changerole/{id}")]
         public async Task<IActionResult> ChangeUserRole(
                 [FromQuery] string uid,
                 [FromHeader] string jwttoken,

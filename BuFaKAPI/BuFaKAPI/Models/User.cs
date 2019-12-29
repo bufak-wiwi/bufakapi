@@ -31,5 +31,9 @@
         public bool Invalid { get; set; }
 
         public bool IsSuperAdmin { get; set; }
+
+        public bool PublicProfile { get; set; }
+
+        public string AddFields { get; set; }
     }
 }

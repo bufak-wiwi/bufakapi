@@ -35,5 +35,7 @@ namespace WebApplication1.Models
         public string AttendeeCost { get; set; }
 
         public string AlumnusCost { get; set; }
+
+        public string AddFields { get; set; }
     }
 }

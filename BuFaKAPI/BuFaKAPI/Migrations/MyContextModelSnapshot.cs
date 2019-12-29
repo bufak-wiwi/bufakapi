@@ -51,6 +51,30 @@ namespace BuFaKAPI.Migrations
                     b.ToTable("ApplicationAuth");
                 });
 
+            modelBuilder.Entity("BuFaKAPI.Models.Event", b =>
+                {
+                    b.Property<string>("EventID")
+                        .ValueGeneratedOnAdd();
+
+                    b.Property<string>("ConferenceID");
+
+                    b.Property<string>("Description");
+
+                    b.Property<int>("Duration");
+
+                    b.Property<string>("PlaceID");
+
+                    b.Property<string>("Start");
+
+                    b.Property<string>("Title");
+
+                    b.Property<string>("Type");
+
+                    b.HasKey("EventID");
+
+                    b.ToTable("Event");
+                });
+
             modelBuilder.Entity("BuFaKAPI.Models.History", b =>
                 {
                     b.Property<int>("HistoryID")
@@ -71,6 +95,32 @@ namespace BuFaKAPI.Migrations
                     b.ToTable("History");
                 });
 
+            modelBuilder.Entity("BuFaKAPI.Models.News", b =>
+                {
+                    b.Property<string>("NewsID")
+                        .ValueGeneratedOnAdd();
+
+                    b.Property<string>("ConferenceID");
+
+                    b.Property<string>("End");
+
+                    b.Property<bool>("Important");
+
+                    b.Property<string>("Link");
+
+                    b.Property<string>("PictureLink");
+
+                    b.Property<string>("Start");
+
+                    b.Property<string>("Text");
+
+                    b.Property<string>("Title");
+
+                    b.HasKey("NewsID");
+
+                    b.ToTable("News");
+                });
+
             modelBuilder.Entity("BuFaKAPI.Models.Newsletter", b =>
                 {
                     b.Property<int>("ID")
@@ -89,6 +139,22 @@ namespace BuFaKAPI.Migrations
                     b.HasKey("ID");
 
                     b.ToTable("Newsletter");
+                });
+
+            modelBuilder.Entity("BuFaKAPI.Models.Place", b =>
+                {
+                    b.Property<string>("PlaceID")
+                        .ValueGeneratedOnAdd();
+
+                    b.Property<string>("Lat");
+
+                    b.Property<string>("Lon");
+
+                    b.Property<string>("Name");
+
+                    b.HasKey("PlaceID");
+
+                    b.ToTable("Place");
                 });
 
             modelBuilder.Entity("BuFaKAPI.Models.Sensible", b =>
@@ -145,6 +211,8 @@ namespace BuFaKAPI.Migrations
                 {
                     b.Property<int>("ConferenceID")
                         .ValueGeneratedOnAdd();
+
+                    b.Property<string>("AddFields");
 
                     b.Property<string>("AlumnusCost");
 
@@ -243,6 +311,8 @@ namespace BuFaKAPI.Migrations
                     b.Property<string>("UID")
                         .ValueGeneratedOnAdd();
 
+                    b.Property<string>("AddFields");
+
                     b.Property<string>("Address");
 
                     b.Property<string>("Birthday");
@@ -258,6 +328,8 @@ namespace BuFaKAPI.Migrations
                     b.Property<string>("Name");
 
                     b.Property<string>("Note");
+
+                    b.Property<bool>("PublicProfile");
 
                     b.Property<string>("Sex");
 
