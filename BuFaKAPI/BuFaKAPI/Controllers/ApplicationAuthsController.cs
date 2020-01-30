@@ -6,6 +6,7 @@
     using System.Text;
     using System.Threading.Tasks;
     using BuFaKAPI.Models;
+    using BuFaKAPI.Models.SubModels;
     using BuFaKAPI.Services;
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Mvc;
@@ -98,7 +99,7 @@
         /// <returns>Nothing</returns>
         [HttpPut("generate/")]
         public async Task<IActionResult> GeneratePasswordsForCouncils(
-            [FromHeader(Name = "jwtkey")] string jwttoken,
+            [FromHeader(Name = "jwttoken")] string jwttoken,
             [FromHeader(Name = "conference_id")] int conference_id,
             [FromBody] OtherKeys otherKeys,
             [FromQuery] string apikey)
@@ -203,6 +204,38 @@
 
                     return this.Ok();
                 }
+            }
+
+            return this.Unauthorized();
+        }
+
+        [HttpGet("forConference/")]
+        public async Task<IActionResult> GetAllAppAuthForConference(
+            [FromQuery] string apikey,
+            [FromHeader(Name = "conference_id")] int conference_id,
+            [FromHeader(Name = "jwttoken")] string jwttoken)
+        {
+            // Permission Level Admin
+            if (this.jwtService.PermissionLevelValid(jwttoken, "admin") && this.auth.KeyIsValid(apikey, conference_id))
+            {
+                List<AppAuthGetObject> rt = new List<AppAuthGetObject>();
+                var authsforconference = this._context.ApplicationAuth.Where(aa => aa.Conference_ID == conference_id).ToList();
+
+                foreach (ApplicationAuth aauth in authsforconference)
+                {
+                    AppAuthGetObject curAAuth = new AppAuthGetObject()
+                    {
+                        Council = aauth.Council_ID == 0 ? null : this._context.Council.Find(aauth.Council_ID),
+                        Conference_ID = aauth.Conference_ID,
+                        Priority = aauth.Priority,
+                        ID = aauth.ID,
+                        Password = aauth.Password
+                    };
+
+                    rt.Add(curAAuth);
+                }
+
+                return this.Ok(rt);
             }
 
             return this.Unauthorized();
