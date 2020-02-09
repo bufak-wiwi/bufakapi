@@ -371,6 +371,7 @@ namespace BuFaKAPI.Controllers
 
                 try
                 {
+
                     var auth = await authProvider.CreateUserWithEmailAndPasswordAsync(userWithPassword.Email, userWithPassword.Password);
                     var firebasetoken = authProvider.SignInWithEmailAndPasswordAsync(userWithPassword.Email, userWithPassword.Password).Result.FirebaseToken;
                     await this.firebase.SendVerificationEmail(firebasetoken);
@@ -409,8 +410,9 @@ namespace BuFaKAPI.Controllers
                 }
 
                 // Catch Email Exists usw.
-                catch (Exception)
+                catch (Exception e)
                 {
+                    this.telBot.SendTextMessage(e.ToString());
                     // { "error": { "code": 400, "message": "EMAIL_EXISTS", "errors": [ { "message": "EMAIL_EXISTS", "domain": "global", "reason": "invalid" } ] } }
                     return this.BadRequest(this.ModelState);
                 }

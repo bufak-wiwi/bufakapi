@@ -1,0 +1,12 @@
+{
+  "type": "service_account",
+  "project_id": "bufak-wiso-dev",
+  "private_key_id": "6bb290641e299cfcf423c89cb2215869ca97c07d",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvwIBADANBgkqhkiG9w0BAQEFAASCBKkwggSlAgEAAoIBAQCtfu1f8UY1bus5\ndVhI60khvCu/3KY4AoSnbfFlMPRq/PORJO7szH3JjRZnMjcsFnWj/4coztifZRn/\nfQIVxCc/bJbO+c05LgY78rehiPLuqr2wnshb03W55Xdx9C/jSpiwawYLtJmSciV6\nvElSv4erYdZ0fm+UukZOdWjzqM+w1/2Mv9lOzhbmWA3ydGftUvADL7JDuNbxeoXj\nU/xFmFJ0uvDpNMSzir3gwq657nQVBmOwfujqEuQvSJnYDWIgYVHs+T0EINXCWqKR\nLDo8LwGT0nfEydN4VbxIcPLrxQtX6GpcmwRA0EvDAmoK6epiy5KnQZrXFQXvIXqo\nOtoA/wrjAgMBAAECggEAEoWU6OO0p5quUQWGhc5ckdXpY8O2GQ+nwsoZdcCar1tO\n02V6flw8Z4qA5EZ3nmTNbVMnxkMC3E1qT5y0XseAmyRIG1OOxbZ0ouzADuY0bSdc\nNeFVqXvzOwPU0x0LCbxafacHT7OZm4lFGAvG1ictYC4DO4+N8PZL8C9Xo3+XoJzZ\nCOg+m4UCuPqtFip10/4KKe3uzYTEIXj1gBuXEWBySuNP0zwihn7V6gOeNMfFkpJt\nSZR2ke59PrAbXO5RBWCJ9KH8xaoL7r3eXHu5wJfGvKwiUTL8mmV0gvFcY7v/EZ9t\nfTP0QxxqjBmlOlj7Oss1e2i89xdCynQCYWrgaWHaHQKBgQDwXYzXcez1FRWWmtrF\n9RX1o8gauJLwF7zb4MHOIQ+JSGRWC+f7eWZQj2xxuIPOq1q1iQ5hs0QqxNDaClCc\nPSLH2h9aKbkcormnixITF/KCfg6XKx8rpPAtQP5wGsK/+U3R7hHj7xIf3/RjLIBf\nId3eM1jsI2Aso8Lsdw0Z/as3dQKBgQC4x+VvwBjnfmfp0aS4N8ykUJUQgs2WRXB/\nU2BIoofPXOhHdNslqpG9/Dpd/rEDeO22Kr3kQ/72HJw6MeUreNIl/pUehoL17NTO\nXxp967RCxMv7e0SKd3/evliAeKFy2HKip2E+plmd+RyBHYWa/tTZsmC4OLhY8rhC\n3/VabjJF9wKBgQCB1nbC1hZimN4NeV6dufL/ulXYIUW2DYyF1VW7C97BkGoqlMnd\n7EjZUXAJydrhI2yfTQaIvfYfiCss7I94pgmInQl8gbctgbT5jMTZrYDg/kjRXYi7\n4Z+fQlFuqvXyDy/7KzdcwYIv16DChYJeYQPhCCmLfNxxoJAlfXWFSaJYFQKBgQCg\nhZ9Ozl2UNV7GZEYpdugDUrG8bzV0Nwy8v8ykLPW4caij8uMyPJRxrD10TH6wWox/\nNXBTbbJ/UWlysMe6VTKSqTAYHZiFVeGlCj90Zp/pZRcjd/maJKfj9A3kRWdT4q7r\nmGbFSzQNJUza6a+Yb4qvN+QIBdY4B1uFVRPLJHHuDwKBgQCAvid8LgXxBHqvTJ/c\nHavZ/1lRmcChswECbjcLkx93VAwZlFJYbGy4RUjgRmUNSCGtpe/VFvNCugO+0V+M\nuilOBDZ4cEVjXS1b5HRNI4ztNM9eZ3UgFSquAN+hMIAC5PUcj8ef9rpGSKtwIbwi\nrh9TsMhN48fsDzoBYO7wdSMUCQ==\n-----END PRIVATE KEY-----\n",
+  "client_email": "firebase-adminsdk-0lb6e@bufak-wiso-dev.iam.gserviceaccount.com",
+  "client_id": "117397638732854117231",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/firebase-adminsdk-0lb6e%40bufak-wiso-dev.iam.gserviceaccount.com"
+}
