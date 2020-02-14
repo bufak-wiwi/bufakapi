@@ -1,6 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
-using BuFaKAPI.Models;
-namespace BuFaKAPI.Models
+﻿namespace BuFaKAPI.Models
 {
     using Microsoft.EntityFrameworkCore;
     using WebApplication1.Models;
@@ -42,5 +40,11 @@ namespace BuFaKAPI.Models
         public DbSet<BuFaKAPI.Models.Newsletter> Newsletter { get; set; }
 
         public DbSet<BuFaKAPI.Models.ApplicationAuth> ApplicationAuth { get; set; }
+
+        public DbSet<BuFaKAPI.Models.News> News { get; set; }
+
+        public DbSet<BuFaKAPI.Models.Event> Event { get; set; }
+
+        public DbSet<BuFaKAPI.Models.Place> Place { get; set; }
     }
 }

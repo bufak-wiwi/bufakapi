@@ -170,8 +170,7 @@
         {
             if (
                 this.auth.KeyIsValid(apikey)
-                && this.jwtService.PermissionLevelValid(jwttoken, "superadmin")
-                )
+                && this.jwtService.PermissionLevelValid(jwttoken, "superadmin"))
             {
                 this._context.Conference.Add(pconf.Conference);
                 try
