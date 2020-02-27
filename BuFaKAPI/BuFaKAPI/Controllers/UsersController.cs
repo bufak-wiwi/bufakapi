@@ -412,7 +412,7 @@ namespace BuFaKAPI.Controllers
                 // Catch Email Exists usw.
                 catch (Exception e)
                 {
-                    this.telBot.SendTextMessage(e.ToString());
+                    this.telBot.SendTextMessage($"Error at USER CREATE with E-Mail: {userWithPassword.Email}");
                     // { "error": { "code": 400, "message": "EMAIL_EXISTS", "errors": [ { "message": "EMAIL_EXISTS", "domain": "global", "reason": "invalid" } ] } }
                     return this.BadRequest(this.ModelState);
                 }
