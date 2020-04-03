@@ -1,4 +1,6 @@
-﻿namespace BuFaKAPI.Models
+﻿using Microsoft.EntityFrameworkCore;
+using BuFaKAPI.Models;
+namespace BuFaKAPI.Models
 {
     using Microsoft.EntityFrameworkCore;
     using WebApplication1.Models;
@@ -46,5 +48,11 @@
         public DbSet<BuFaKAPI.Models.Event> Event { get; set; }
 
         public DbSet<BuFaKAPI.Models.Place> Place { get; set; }
+
+        public DbSet<BuFaKAPI.Models.VotingQuestion> VotingQuestion { get; set; }
+
+        public DbSet<BuFaKAPI.Models.VotingAnswer> VotingAnswer { get; set; }
+
+        public DbSet<BuFaKAPI.Models.VotingMajority> VotingMajority { get; set; }
     }
 }
