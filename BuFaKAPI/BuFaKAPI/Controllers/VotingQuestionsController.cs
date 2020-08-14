@@ -71,6 +71,10 @@ namespace BuFaKAPI.Controllers
                 }
 
                 VotingQuestionWithAnswers votingWithAnswers = new VotingQuestionWithAnswers(question);
+                votingWithAnswers.CouncilAnswer = this._context.VotingAnswer
+                    .Where(x => x.QuestionID == question.QuestionID && x.CouncilID == this.jwtService.GetCouncilfromJwtKey(jwttoken))
+                    .OrderBy(x => x.Priority)
+                    .FirstOrDefault();
                 if (this.jwtService.PermissionLevelValid(jwttoken, "superadmin"))
                 {
                     var votingAnswers = await this._context.VotingAnswer.Where(x => x.QuestionID == question.QuestionID).ToListAsync();
@@ -78,11 +82,10 @@ namespace BuFaKAPI.Controllers
                     {
                         votingAnswers = await this.AddCouncilToAnswers(votingAnswers);
                         votingWithAnswers.AnswerList = votingAnswers;
-                        return Ok(votingWithAnswers);
                     }
                 }
 
-                return Ok(question);
+                return Ok(votingWithAnswers);
             }
 
             return this.Unauthorized();

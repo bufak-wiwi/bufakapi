@@ -9,6 +9,8 @@ namespace BuFaKAPI.Models.SubModels
     {
         public List<VotingAnswer> AnswerList { get; set; } = new List<VotingAnswer>();
 
+        public VotingAnswer CouncilAnswer { get; set; }
+
         public VotingQuestionWithAnswers(VotingQuestion question)
         {
             QuestionID = question.QuestionID;

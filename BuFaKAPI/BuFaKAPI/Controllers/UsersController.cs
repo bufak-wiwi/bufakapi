@@ -395,7 +395,7 @@ namespace BuFaKAPI.Controllers
                         Note = userWithPassword.Note,
                     };
 
-                    string token = this.jwtService.CreateKey(user.UID);
+                    string token = this.jwtService.CreateKey(user.UID, user.CouncilID);
                     this.telBot.SendTextMessage($"User Created, Name: {user.Name} {user.Surname} ");
                     var userreturn = new
                     {

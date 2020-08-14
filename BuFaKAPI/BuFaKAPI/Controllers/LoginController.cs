@@ -71,8 +71,8 @@ namespace BuFaKAPI.Controllers
 
                 if (!auth.IsExpired() && !string.IsNullOrEmpty(auth.User.LocalId))
                 {
-                    result.TokenString = this.jwtService.CreateKey(auth.User.LocalId);
                     result.User = await this._context.User.FindAsync(auth.User.LocalId);
+                    result.TokenString = this.jwtService.CreateKey(result.User.UID, result.User.CouncilID);
                     result.Conferences = allconf;
 
                     // set values in result whether the user has already applied to the conference or not
