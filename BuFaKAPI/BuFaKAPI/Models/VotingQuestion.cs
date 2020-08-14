@@ -24,7 +24,7 @@ namespace BuFaKAPI.Models
 
         public string Vote { get; set; }
 
-        public DateTime ResolvedOn { get; set; }
+        public DateTime? ResolvedOn { get; set; }
 
         public int SumYes { get; set; }
 

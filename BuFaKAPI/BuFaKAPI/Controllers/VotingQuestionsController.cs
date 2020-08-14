@@ -8,6 +8,8 @@ using Microsoft.EntityFrameworkCore;
 using BuFaKAPI.Models;
 using BuFaKAPI.Services;
 using Microsoft.Extensions.Options;
+using BuFaKAPI.Models.SubModels;
+using WebApplication1.Models;
 
 namespace BuFaKAPI.Controllers
 {
@@ -58,20 +60,48 @@ namespace BuFaKAPI.Controllers
             {
                 if (!ModelState.IsValid)
                 {
-                    return BadRequest(ModelState);
+                    return this.BadRequest(this.ModelState);
                 }
 
-                var votingQuestion = await _context.VotingQuestion.FindAsync(id);
+                var question = await _context.VotingQuestion.FindAsync(id);
 
-                if (votingQuestion == null)
+                if (question == null)
                 {
                     return NotFound();
                 }
 
-                return Ok(votingQuestion);
+                VotingQuestionWithAnswers votingWithAnswers = new VotingQuestionWithAnswers(question);
+                if (this.jwtService.PermissionLevelValid(jwttoken, "superadmin"))
+                {
+                    var votingAnswers = await this._context.VotingAnswer.Where(x => x.QuestionID == question.QuestionID).ToListAsync();
+                    if (votingAnswers != null)
+                    {
+                        votingAnswers = await this.AddCouncilToAnswers(votingAnswers);
+                        votingWithAnswers.AnswerList = votingAnswers;
+                        return Ok(votingWithAnswers);
+                    }
+                }
+
+                return Ok(question);
             }
 
             return this.Unauthorized();
+        }
+
+        private async Task<List<VotingAnswer>> AddCouncilToAnswers(List<VotingAnswer> votingAnswers)
+        {
+            List<Task<Council>> listOfTaks = new List<Task<Council>>();
+            foreach (var answer in votingAnswers)
+            {
+                listOfTaks.Add(this._context.Council.FindAsync(answer.CouncilID));
+            }
+
+            var councils = await Task.WhenAll<Council>(listOfTaks);
+            for (int i = 0; i < councils.Length; i++)
+            {
+                votingAnswers[i].Council = councils[i];
+            }
+            return votingAnswers;
         }
 
         // PUT: api/VotingQuestions/5
