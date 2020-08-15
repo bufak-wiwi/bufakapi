@@ -8,6 +8,8 @@ using Microsoft.EntityFrameworkCore;
 using BuFaKAPI.Models;
 using BuFaKAPI.Services;
 using Microsoft.Extensions.Options;
+using BuFaKAPI.Models.SubModels;
+using WebApplication1.Models;
 
 namespace BuFaKAPI.Controllers
 {
@@ -36,40 +38,99 @@ namespace BuFaKAPI.Controllers
             [FromRoute] int id,
             [FromQuery] string apikey)
         {
-            if (this.jwtService.PermissionLevelValid(jwttoken, "user") && this.auth.KeyIsValid(apikey))
+            if (this.jwtService.PermissionLevelValid(jwttoken, "superadmin") && this.auth.KeyIsValid(apikey))
             {
                 return this.Ok(this._context.VotingAnswer.Where(x => x.QuestionID == id).ToList());
-            }
-                return this.Unauthorized();
-        }
-
-        // POST: api/VotingAnswers
-        [HttpPost]
-        public async Task<IActionResult> PostVotingAnswer(
-            [FromHeader(Name = "conference_id")] int conference_id,
-            [FromHeader(Name = "jwttoken")] string jwttoken,
-            [FromQuery] string apikey,
-            [FromBody] VotingAnswer votingAnswer)
-        {
-            if (this.jwtService.PermissionLevelValid(jwttoken, "user") && this.auth.KeyIsValid(apikey))
-            {
-                if (!this.ModelState.IsValid)
-                {
-                    return BadRequest(this.ModelState);
-                }
-
-                this._context.VotingAnswer.Add(votingAnswer);
-                await this._context.SaveChangesAsync();
-
-                return this.CreatedAtAction("GetVotingAnswer", new { id = votingAnswer.AnswerID }, votingAnswer);
             }
 
             return this.Unauthorized();
         }
 
-        private bool VotingAnswerExists(int id)
+        // POST: api/VotingAnswers
+        [HttpPost]
+        public async Task<IActionResult> PostVote(
+            [FromHeader(Name = "conference_id")] int conference_id,
+            [FromHeader(Name = "jwttoken")] string jwttoken,
+            [FromQuery] string apikey,
+            [FromBody] VoteObject voteObject)
         {
-            return _context.VotingAnswer.Any(e => e.AnswerID == id);
+            if (!this.jwtService.PermissionLevelValid(jwttoken, "user") || !this.auth.KeyIsValid(apikey))
+            {
+                return this.Unauthorized();
+            }
+
+            if (!this.ModelState.IsValid || await this._context.VotingQuestion.FindAsync(voteObject.QuestionID) == null)
+            {
+                return this.BadRequest(this.ModelState); // modelState not valid or question does not exist
+            }
+
+            Conference_Application application = await this._context.Conference_Application.FindAsync(conference_id, this.jwtService.GetUIDfromJwtKey(jwttoken));
+            if (application == null || application.Status != Conference_ApplicationController.StatusToString(CAStatus.IsAttendee))
+            {
+                return this.Unauthorized(); // user is not attending the conference
+            }
+
+            int councilID = this.jwtService.GetCouncilfromJwtKey(jwttoken);
+            VotingAnswer currentAnswer = this._context.VotingAnswer.Where(x => x.CouncilID == councilID && x.QuestionID == voteObject.QuestionID).FirstOrDefault();
+
+            if (currentAnswer == null)
+            {
+                VotingAnswer votingAnswer = new VotingAnswer() // create new votingAnswer
+                {
+                    CouncilID = councilID,
+                    Priority = application.Priority,
+                    QuestionID = voteObject.QuestionID,
+                    Vote = voteObject.Vote,
+                };
+                await this.UpdateQuestionVotes(voteObject.QuestionID, voteObject.Vote, "");
+                this._context.VotingAnswer.Add(votingAnswer);
+                await this._context.SaveChangesAsync();
+                return this.CreatedAtAction("PostVote", new { id = votingAnswer.AnswerID }, votingAnswer);
+            }
+
+            if (currentAnswer.Priority < application.Priority)
+            {
+                return this.Conflict(); // there is already a vote from that council with a higher priority
+            }
+
+            await this.UpdateQuestionVotes(voteObject.QuestionID, voteObject.Vote, currentAnswer.Vote);
+            currentAnswer.Vote = voteObject.Vote; // update the current Answer to the new vote
+            this._context.Update(currentAnswer);
+            await this._context.SaveChangesAsync();
+            return this.CreatedAtAction("PostVote", new { id = currentAnswer.AnswerID }, currentAnswer);
+        }
+
+        private async Task UpdateQuestionVotes(int questionID, string vote, string oldVote)
+        {
+            if (vote != oldVote)
+            {
+                VotingQuestion question = await this._context.VotingQuestion.FindAsync(questionID);
+                this.UpdateQuestion(question, this.getVoteType(vote), true);
+                this.UpdateQuestion(question, this.getVoteType(oldVote), false);
+                this._context.Update(question);
+            }
+        }
+
+        private void UpdateQuestion(VotingQuestion question, VoteType voteType, bool addition)
+        {
+            switch (voteType)
+            {
+                case VoteType.Yes: question.SumYes += addition ? 1 : -1; break;
+                case VoteType.No: question.SumNo += addition ? 1 : -1; break;
+                case VoteType.Abstention: question.SumAbstention += addition ? 1 : -1; break;
+                default: return;
+            }
+        }
+
+        private VoteType getVoteType(string vote)
+        {
+            switch (vote)
+            {
+                case "Ja": return VoteType.Yes;
+                case "Nein": return VoteType.No;
+                case "Enthaltung": return VoteType.Abstention;
+                default: return VoteType.Other;
+            }
         }
     }
 }
