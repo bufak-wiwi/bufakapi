@@ -190,7 +190,7 @@ namespace BuFaKAPI.Controllers
                     Timestamp = DateTime.Now.ToString(),
                     Hotel = application.Hotel,
                     Room = application.Room,
-                    Status = this.StatusToString(application.Status),
+                    Status = this.StatusToString(CAStatus.HasApplied),
                     SensibleID = sensibleID,
                     Sensible = this._context.Sensible.FindAsync(sensibleID).Result
                 };
