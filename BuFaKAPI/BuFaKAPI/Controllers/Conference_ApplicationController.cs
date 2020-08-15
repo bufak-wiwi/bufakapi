@@ -190,7 +190,7 @@ namespace BuFaKAPI.Controllers
                     Timestamp = DateTime.Now.ToString(),
                     Hotel = application.Hotel,
                     Room = application.Room,
-                    Status = this.StatusToString(CAStatus.HasApplied),
+                    Status = Conference_ApplicationController.StatusToString(CAStatus.HasApplied),
                     SensibleID = sensibleID,
                     Sensible = this._context.Sensible.FindAsync(sensibleID).Result
                 };
@@ -247,7 +247,7 @@ namespace BuFaKAPI.Controllers
                     OldValue = thisca.Status,
                     HistoryType = "Edit"
                 };
-                thisca.Status = this.StatusToString(newstatus.NewStatus);
+                thisca.Status = Conference_ApplicationController.StatusToString(newstatus.NewStatus);
                 this._context.Entry(thisca).State = EntityState.Modified;
 
                 try
@@ -301,7 +301,7 @@ namespace BuFaKAPI.Controllers
                         OldValue = thisca.Status,
                         HistoryType = "Edit"
                     };
-                    thisca.Status = this.StatusToString(newstati.NewStatus);
+                    thisca.Status = Conference_ApplicationController.StatusToString(newstati.NewStatus);
                     this._context.Entry(thisca).State = EntityState.Modified;
 
                     try
@@ -396,7 +396,7 @@ namespace BuFaKAPI.Controllers
             return this._context.Conference_Application.Any(e => e.ConferenceID == conference_id && e.ApplicantUID == uid);
         }
 
-        private string StatusToString(CAStatus castatus)
+        public static string StatusToString(CAStatus castatus)
         {
             if (castatus == CAStatus.HasApplied)
             {
@@ -420,7 +420,7 @@ namespace BuFaKAPI.Controllers
             }
         }
 
-        private CAStatus StatusToObject(string castatus)
+        public static CAStatus StatusToObject(string castatus)
         {
             if (castatus.Equals("IsRejected"))
             {
