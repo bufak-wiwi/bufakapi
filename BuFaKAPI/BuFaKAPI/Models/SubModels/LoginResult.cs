@@ -19,6 +19,12 @@
         public bool Rejected { get; set; }
 
         public int Priority { get; set; }
+
+        public bool IsHelper { get; set; }
+
+        public bool IsAlumnus { get; set; }
+
+        public bool IsBuFaKCouncil { get; set; }
     }
 
     public class LoginResult

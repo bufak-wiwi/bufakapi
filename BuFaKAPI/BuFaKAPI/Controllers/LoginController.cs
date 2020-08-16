@@ -62,12 +62,7 @@ namespace BuFaKAPI.Controllers
             {
                 var result = new LoginResult();
                 var auth = await authProvider.SignInWithEmailAndPasswordAsync(email, password);
-                var conferences = this._context.Conference.Where(c => c.Invalid == false);
-                List<Conference> allconf = new List<Conference>();
-                foreach (Conference conf in conferences)
-                {
-                    allconf.Add(conf);
-                }
+                List<Conference> allconf = this._context.Conference.Where(c => c.Invalid == false).ToList();
 
                 if (!auth.IsExpired() && !string.IsNullOrEmpty(auth.User.LocalId))
                 {
@@ -173,7 +168,10 @@ namespace BuFaKAPI.Controllers
                         Admin = this._context.Administrator.Any(a => a.ConferenceID == ca.ConferenceID && a.UID == uid) ? true : false,
                         Attendee = ca.Status == "IsAttendee" ? true : false,
                         Rejected = ca.Status == "IsRejected" ? true : false,
-                        Priority = ca.Priority
+                        Priority = ca.Priority,
+                        IsAlumnus = ca.IsAlumnus,
+                        IsHelper = ca.IsHelper,
+                        IsBuFaKCouncil = ca.IsBuFaKCouncil,
                     };
                     lufc.Add(ufc);
                 }
