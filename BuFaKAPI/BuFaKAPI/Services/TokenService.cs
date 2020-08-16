@@ -36,7 +36,7 @@
         {
             var credentials = new SigningCredentials(this.securityKey, SecurityAlgorithms.HmacSha256Signature);
             var header = new JwtHeader(credentials);
-            int unixTimestamp = (int)DateTime.UtcNow.AddMinutes(60).Subtract(new DateTime(1970, 1, 1)).TotalSeconds;
+            int unixTimestamp = (int)DateTime.UtcNow.AddDays(3).Subtract(new DateTime(1970, 1, 1)).TotalSeconds;
             var payload = new JwtPayload
            {
                { "uid", uid },
