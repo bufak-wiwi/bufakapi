@@ -82,7 +82,6 @@ namespace BuFaKAPI.Controllers
                     QuestionID = voteObject.QuestionID,
                     Vote = voteObject.Vote,
                 };
-                await this.UpdateQuestionVotes(voteObject.QuestionID, voteObject.Vote, "");
                 this._context.VotingAnswer.Add(votingAnswer);
                 await this._context.SaveChangesAsync();
                 return this.CreatedAtAction("PostVote", new { id = votingAnswer.AnswerID }, votingAnswer);
@@ -93,45 +92,11 @@ namespace BuFaKAPI.Controllers
                 return this.Conflict(); // there is already a vote from that council with a higher priority
             }
 
-            await this.UpdateQuestionVotes(voteObject.QuestionID, voteObject.Vote, currentAnswer.Vote);
             currentAnswer.Vote = voteObject.Vote; // update the current Answer to the new vote
             currentAnswer.Priority = application.Priority;
             this._context.Update(currentAnswer);
             await this._context.SaveChangesAsync();
             return this.CreatedAtAction("PostVote", new { id = currentAnswer.AnswerID }, currentAnswer);
-        }
-
-        private async Task UpdateQuestionVotes(int questionID, string vote, string oldVote)
-        {
-            if (vote != oldVote)
-            {
-                VotingQuestion question = await this._context.VotingQuestion.FindAsync(questionID);
-                this.UpdateQuestion(question, this.getVoteType(vote), true);
-                this.UpdateQuestion(question, this.getVoteType(oldVote), false);
-                this._context.Update(question);
-            }
-        }
-
-        private void UpdateQuestion(VotingQuestion question, VoteType voteType, bool addition)
-        {
-            switch (voteType)
-            {
-                case VoteType.Yes: question.SumYes += addition ? 1 : -1; break;
-                case VoteType.No: question.SumNo += addition ? 1 : -1; break;
-                case VoteType.Abstention: question.SumAbstention += addition ? 1 : -1; break;
-                default: return;
-            }
-        }
-
-        private VoteType getVoteType(string vote)
-        {
-            switch (vote)
-            {
-                case "Ja": return VoteType.Yes;
-                case "Nein": return VoteType.No;
-                case "Enthaltung": return VoteType.Abstention;
-                default: return VoteType.Other;
-            }
         }
     }
 }
