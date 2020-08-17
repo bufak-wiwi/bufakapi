@@ -59,9 +59,10 @@ namespace BuFaKAPI.Controllers
                 return this.Unauthorized();
             }
 
-            if (!this.ModelState.IsValid || await this._context.VotingQuestion.FindAsync(voteObject.QuestionID) == null)
+            VotingQuestion question = await this._context.VotingQuestion.FindAsync(voteObject.QuestionID);
+            if (!this.ModelState.IsValid || question == null || !question.IsOpen || question.ResolvedOn != null)
             {
-                return this.BadRequest(this.ModelState); // modelState not valid or question does not exist
+                return this.BadRequest(this.ModelState); // modelState not valid, question does not exist or is not open for voting
             }
 
             Conference_Application application = await this._context.Conference_Application.FindAsync(conference_id, this.jwtService.GetUIDfromJwtKey(jwttoken));
