@@ -133,6 +133,7 @@ namespace BuFaKAPI.Controllers
                     .Where(x => x.QuestionID == question.QuestionID && x.CouncilID == this.jwtService.GetCouncilfromJwtKey(jwttoken))
                     .OrderBy(x => x.Priority)
                     .FirstOrDefault();
+                votingWithAnswers.TotalVotes = this._context.VotingAnswer.Where(x => x.QuestionID == question.QuestionID).Count();
                 if (this.jwtService.PermissionLevelValid(jwttoken, "superadmin"))
                 {
                     var votingAnswers = await this._context.VotingAnswer.Where(x => x.QuestionID == question.QuestionID).ToListAsync();

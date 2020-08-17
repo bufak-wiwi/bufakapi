@@ -11,6 +11,8 @@ namespace BuFaKAPI.Models.SubModels
 
         public VotingAnswer CouncilAnswer { get; set; }
 
+        public int TotalVotes { get; set; }
+
         public VotingQuestionWithAnswers(VotingQuestion question)
         {
             QuestionID = question.QuestionID;
