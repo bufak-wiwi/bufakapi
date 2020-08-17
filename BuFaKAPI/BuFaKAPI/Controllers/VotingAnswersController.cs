@@ -95,6 +95,7 @@ namespace BuFaKAPI.Controllers
 
             await this.UpdateQuestionVotes(voteObject.QuestionID, voteObject.Vote, currentAnswer.Vote);
             currentAnswer.Vote = voteObject.Vote; // update the current Answer to the new vote
+            currentAnswer.Priority = application.Priority;
             this._context.Update(currentAnswer);
             await this._context.SaveChangesAsync();
             return this.CreatedAtAction("PostVote", new { id = currentAnswer.AnswerID }, currentAnswer);
