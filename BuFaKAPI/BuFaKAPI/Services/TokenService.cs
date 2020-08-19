@@ -32,15 +32,16 @@
             this.telBot = new TelegramBot();
         }
 
-        public string CreateKey(string uid)
+        public string CreateKey(string uid, int councilID)
         {
             var credentials = new SigningCredentials(this.securityKey, SecurityAlgorithms.HmacSha256Signature);
             var header = new JwtHeader(credentials);
-            int unixTimestamp = (int)DateTime.UtcNow.AddMinutes(60).Subtract(new DateTime(1970, 1, 1)).TotalSeconds;
+            int unixTimestamp = (int)DateTime.UtcNow.AddDays(3).Subtract(new DateTime(1970, 1, 1)).TotalSeconds;
             var payload = new JwtPayload
            {
                { "uid", uid },
                { "exp", unixTimestamp },
+               { "councilid",  councilID },
            };
             var secToken = new JwtSecurityToken(header, payload);
             return this.handler.WriteToken(secToken);
@@ -81,6 +82,12 @@
             var token = this.handler.ReadJwtToken(key);
             var uid = token.Claims.First(claim => claim.Type == "uid").Value;
             return uid;
+        }
+
+        public int GetCouncilfromJwtKey(string key)
+        {
+            var token = this.handler.ReadJwtToken(key);
+            return int.Parse(token.Claims.First(claim => claim.Type == "councilid").Value);
         }
 
         public string GenerateApiKey()
