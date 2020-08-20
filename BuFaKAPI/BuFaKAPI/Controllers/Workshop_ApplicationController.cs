@@ -289,8 +289,22 @@
                 foreach (UserToWS utw in newstati.UsersToWorkshop)
                 {
                     var thisWA = this._context.Workshop_Application.Where(wa => wa.ApplicantUID == utw.UID && wa.WorkshopID == utw.WorkshopID).FirstOrDefault();
-                    thisWA.Status = this.StatusToString(newstati.NewStatus);
-                    this._context.Entry(thisWA).State = EntityState.Modified;
+                    if (thisWA == null)
+                    {
+                        thisWA = new Workshop_Application
+                        {
+                            ApplicantUID = utw.UID,
+                            WorkshopID = utw.WorkshopID,
+                            Priority = 1,
+                            Status = this.StatusToString(WAStatus.IsAttendee),
+                        };
+                        this._context.Workshop_Application.Add(thisWA);
+                    } else
+                    {
+                        thisWA.Status = this.StatusToString(newstati.NewStatus);
+                        this._context.Entry(thisWA).State = EntityState.Modified;
+                    }
+
 
                     try
                     {
