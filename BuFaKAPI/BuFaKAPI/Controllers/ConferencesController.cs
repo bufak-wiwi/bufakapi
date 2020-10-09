@@ -165,14 +165,14 @@
         [HttpPost]
         public async Task<IActionResult> PostConference(
                                                         [FromQuery] string apikey,
-                                                        [FromBody] PostConference pconf,
+                                                        [FromBody] Conference conference,
                                                         [FromHeader] string jwttoken)
         {
             if (
                 this.auth.KeyIsValid(apikey)
                 && this.jwtService.PermissionLevelValid(jwttoken, "superadmin"))
             {
-                this._context.Conference.Add(pconf.Conference);
+                this._context.Conference.Add(conference);
                 try
                 {
                     await this._context.SaveChangesAsync();
@@ -182,29 +182,7 @@
                         throw;
                 }
 
-                var newapikey = this.jwtService.GenerateApiKey();
-                var validUntil = DateTime.Parse(pconf.Conference.DateEnd).AddDays(60).ToString();
-
-                // create a new api key with metadata and write it to the database
-                Auth auth = new Auth
-                {
-                    ApiKey = newapikey,
-                    ValidUntil = validUntil,
-                    CreatedOn = DateTime.Now.ToString(),
-                    Note = pconf.Note,
-                    ConferenceID = pconf.Conference.ConferenceID
-                };
-                this._context.Auth.Add(auth);
-                try
-                {
-                    await this._context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    throw;
-                }
-
-                return this.CreatedAtAction("GetConference", new { id = pconf.Conference.ConferenceID }, pconf.Conference);
+                return this.CreatedAtAction("GetConference", new { id = conference.ConferenceID }, conference);
             }
 
             return this.Unauthorized();
