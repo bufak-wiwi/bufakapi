@@ -216,6 +216,53 @@
             return this.Unauthorized();
         }
 
+        /// <summary>
+        /// Adds a Workshop to the Database
+        /// </summary>
+        /// <param name="workshop">Workshop Element to be added</param>
+        /// <param name="jwttoken">User Token for Auth</param>
+        /// <param name="apikey">APIKey for the access</param>
+        /// <returns>Created Item on Success</returns>
+        /// <response code="201">Returns the newly created item</response>
+        /// <response code="401">when APIKey is not Correct</response>
+        /// <response code="400">when Workshop Model is not Valid</response>
+        [Route("Suggestion")]
+        [HttpPost]
+        public async Task<IActionResult> PostWorkshopSuggestion(
+            [FromBody] Workshop workshop,
+            [FromHeader] string jwttoken,
+            [FromQuery] string apikey)
+        {
+            // Permission Level User
+            if (this.jwtService.PermissionLevelValid(jwttoken, "user"))
+            {
+                if (!this.ModelState.IsValid)
+                {
+                    return this.BadRequest(this.ModelState);
+                }
+
+                string uid = this.jwtService.GetUIDfromJwtKey(jwttoken);
+                User user = this._context.User.Find(uid);
+
+                // Check if user is the host of the suggested workshop and the time is set to the default suggestion time
+                if (
+                    workshop.HostUID != user.UID ||
+                    workshop.HostName != $"{user.Name} {user.Surname}" ||
+                    workshop.Start != "2020-12-31T23:59")
+                {
+                    return this.BadRequest(this.ModelState);
+                }
+
+                workshop.Conference = this._context.Conference.Where(c => c.ConferenceID == workshop.ConferenceID).FirstOrDefault();
+                this._context.Workshop.Add(workshop);
+                await this._context.SaveChangesAsync();
+
+                return this.CreatedAtAction("WorkshopSuggestion", new { id = workshop.WorkshopID }, workshop);
+            }
+
+            return this.Unauthorized();
+        }
+
         // DELETE: api/Workshops/5
 
         /// <summary>
@@ -223,12 +270,14 @@
         /// </summary>
         /// <param name="id">Id of the Workshop to be deleted</param>
         /// <param name="apikey">API Key for Authentification</param>
+        /// <param name="jwttoken"></param>
         /// <returns>200 OK for Success</returns>
         /// <response code="400">Bad Request if model is not valid</response>
         /// <response code="401">Unauthorized if API Key not valid</response>
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteWorkshop([FromRoute] int id, 
-                                                        [FromQuery] string apikey, 
+        public async Task<IActionResult> DeleteWorkshop(
+            [FromRoute] int id,
+                                                        [FromQuery] string apikey,
                                                         [FromHeader] string jwttoken)
         {
             if (this.jwtService.PermissionLevelValid(jwttoken, "admin") && this.auth.KeyIsValid(apikey))
