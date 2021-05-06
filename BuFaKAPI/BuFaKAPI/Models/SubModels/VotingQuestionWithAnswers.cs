@@ -21,11 +21,17 @@ namespace BuFaKAPI.Models.SubModels
             QuestionText = question.QuestionText;
             ArrivedCouncilCount = question.ArrivedCouncilCount;
             IsOpen = question.IsOpen;
+            IsSecret = question.IsSecret;
             Vote = question.Vote;
             ResolvedOn = question.ResolvedOn;
-            SumYes = question.SumYes;
-            SumNo = question.SumNo;
-            SumAbstention = question.SumAbstention;
+            SumYes = ShowVote(question) ? question.SumYes : 0;
+            SumNo = ShowVote(question) ? question.SumNo : 0;
+            SumAbstention = ShowVote(question) ? question.SumAbstention : 0;
+        }
+
+        private static bool ShowVote(VotingQuestion question)
+        {
+            return question.ResolvedOn != null;
         }
     }
 }

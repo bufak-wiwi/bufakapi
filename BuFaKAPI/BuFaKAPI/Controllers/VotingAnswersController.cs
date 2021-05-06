@@ -59,16 +59,21 @@ namespace BuFaKAPI.Controllers
                 return this.Unauthorized();
             }
 
+            Conference_Application application = await this._context.Conference_Application.FindAsync(conference_id, this.jwtService.GetUIDfromJwtKey(jwttoken));
+            if (application == null || application.Status != Conference_ApplicationController.StatusToString(CAStatus.IsAttendee))
+            {
+                return this.Unauthorized(); // user is not attending the conference
+            }
+
             VotingQuestion question = await this._context.VotingQuestion.FindAsync(voteObject.QuestionID);
             if (!this.ModelState.IsValid || question == null || !question.IsOpen || question.ResolvedOn != null)
             {
                 return this.BadRequest(this.ModelState); // modelState not valid, question does not exist or is not open for voting
             }
 
-            Conference_Application application = await this._context.Conference_Application.FindAsync(conference_id, this.jwtService.GetUIDfromJwtKey(jwttoken));
-            if (application == null || application.Status != Conference_ApplicationController.StatusToString(CAStatus.IsAttendee))
+            if (question.IsSecret && (application.Priority != 1 || application.IsAlumnus || application.IsBuFaKCouncil || application.IsHelper))
             {
-                return this.Unauthorized(); // user is not attending the conference
+                return this.BadRequest("Only user with priority 1 are allowed to vote");
             }
 
             int councilID = this.jwtService.GetCouncilfromJwtKey(jwttoken);
@@ -81,16 +86,24 @@ namespace BuFaKAPI.Controllers
                     CouncilID = councilID,
                     Priority = application.Priority,
                     QuestionID = voteObject.QuestionID,
-                    Vote = voteObject.Vote,
+                    Vote = question.IsSecret ? string.Empty : voteObject.Vote,
                 };
                 this._context.VotingAnswer.Add(votingAnswer);
+
+                if (question.IsSecret)
+                {
+                    // add the vote to the secret question
+                    VotingQuestionsController.AddVoteToQuestion(question, VotingQuestionsController.GetVoteType(voteObject.Vote));
+                    this._context.Update(question);
+                }
+
                 await this._context.SaveChangesAsync();
                 return this.CreatedAtAction("PostVote", new { id = votingAnswer.AnswerID }, votingAnswer);
             }
 
-            if (currentAnswer.Priority < application.Priority)
+            if (currentAnswer.Priority < application.Priority || question.IsSecret)
             {
-                return this.Conflict(); // there is already a vote from that council with a higher priority
+                return this.Conflict(); // there is already a vote from that council (with a higher priority or its a secret question)
             }
 
             currentAnswer.Vote = voteObject.Vote; // update the current Answer to the new vote

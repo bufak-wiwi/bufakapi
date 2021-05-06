@@ -166,7 +166,7 @@
                 {
                     return this.BadRequest(this.ModelState);
                 }
-
+                
                 this._context.Council.Add(council);
                 await this._context.SaveChangesAsync();
 
