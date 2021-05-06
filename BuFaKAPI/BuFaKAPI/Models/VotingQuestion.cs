@@ -1,9 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Threading.Tasks;
-using WebApplication1.Models;
 
 namespace BuFaKAPI.Models
 {
@@ -18,9 +14,11 @@ namespace BuFaKAPI.Models
 
         public string QuestionText { get; set; }
 
-        public int ArrivedCouncilCount {get;set;}
+        public int ArrivedCouncilCount { get; set; }
 
         public bool IsOpen { get; set; }
+
+        public bool IsSecret { get; set; }
 
         public string Vote { get; set; }
 

@@ -71,17 +71,21 @@ namespace BuFaKAPI.Controllers
                 }
 
                 question.ResolvedOn = DateTime.Now;
-                question.SumYes = 0;
-                question.SumNo = 0;
-                question.SumAbstention = 0;
 
-                // select all votes for the question but only the highest priority per council
-                List<VotingAnswer> answers = this._context.VotingAnswer
-                    .Where(x => x.QuestionID == question.QuestionID)
-                    .GroupBy(x => x.CouncilID)
-                    .Select(group => group.OrderBy(vote => vote.Priority).First())
-                    .ToList();
-                answers.ForEach(x => this.AddVoteToQuestion(question, this.GetVoteType(x.Vote)));
+                if (!question.IsSecret) // count all votes
+                {
+                    question.SumYes = 0;
+                    question.SumNo = 0;
+                    question.SumAbstention = 0;
+
+                    // select all votes for the question but only the highest priority per council
+                    List<VotingAnswer> answers = this._context.VotingAnswer
+                        .Where(x => x.QuestionID == question.QuestionID)
+                        .GroupBy(x => x.CouncilID)
+                        .Select(group => group.OrderBy(vote => vote.Priority).First())
+                        .ToList();
+                    answers.ForEach(x => AddVoteToQuestion(question, GetVoteType(x.Vote)));
+                }
 
                 this._context.Entry(question).State = EntityState.Modified;
                 try
@@ -144,7 +148,7 @@ namespace BuFaKAPI.Controllers
                     }
                 }
 
-                return Ok(votingWithAnswers);
+                return this.Ok(votingWithAnswers);
             }
 
             return this.Unauthorized();
@@ -264,23 +268,18 @@ namespace BuFaKAPI.Controllers
             return this.Unauthorized();
         }
 
-        private bool VotingQuestionExists(int id)
-        {
-            return this._context.VotingQuestion.Any(e => e.QuestionID == id);
-        }
-
-        private void AddVoteToQuestion(VotingQuestion question, VoteType voteType)
+        public static void AddVoteToQuestion(VotingQuestion question, VoteType voteType)
         {
             switch (voteType)
             {
-                case VoteType.Yes: question.SumYes +=  1; break;
+                case VoteType.Yes: question.SumYes += 1; break;
                 case VoteType.No: question.SumNo += 1; break;
                 case VoteType.Abstention: question.SumAbstention += 1; break;
                 default: return;
             }
         }
 
-        private VoteType GetVoteType(string vote)
+        public static VoteType GetVoteType(string vote)
         {
             switch (vote)
             {
@@ -289,6 +288,11 @@ namespace BuFaKAPI.Controllers
                 case "Enthaltung": return VoteType.Abstention;
                 default: return VoteType.Other;
             }
+        }
+
+        private bool VotingQuestionExists(int id)
+        {
+            return this._context.VotingQuestion.Any(e => e.QuestionID == id);
         }
     }
 }
