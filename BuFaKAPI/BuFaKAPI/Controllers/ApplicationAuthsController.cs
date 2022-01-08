@@ -248,7 +248,7 @@
 
         private string GeneratePassword()
         {
-            string characters = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz|-[]";
+            string characters = "23456789abcdefghijkmnpqrstuwxyz";
             StringBuilder result = new StringBuilder(8);
             Random random = new Random();
             for (int i = 0; i < 8; i++)
