@@ -32,12 +32,12 @@
         // GET: api/export/complete/1
 
         /// <summary>
-        /// Gets an Export of all the ApplicantData of one Conference
+        /// Gets the number of all Applications for a specific conference
         /// </summary>
-        /// <param name="conference_id">ID of the Conference in Question</param>
+        /// <param name="conference_id">ID of the Conference</param>
         /// <param name="apikey">API Key for authentification</param>
 
-        /// <returns>19 Attributes in one Object</returns>
+        /// <returns>number of all Applications for a specific conference</returns>
         [HttpGet("numberofapplications/{conference_id}")]
         public IActionResult GetAll(
             [FromRoute] int conference_id,
