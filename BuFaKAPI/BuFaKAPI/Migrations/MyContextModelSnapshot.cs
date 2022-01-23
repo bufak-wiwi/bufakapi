@@ -383,6 +383,36 @@ namespace BuFaKAPI.Migrations
                     b.ToTable("Council");
                 });
 
+            modelBuilder.Entity("WebApplication1.Models.Travel", b =>
+                {
+                    b.Property<int>("TravelID")
+                        .ValueGeneratedOnAdd();
+
+                    b.Property<string>("ArrivalPlace");
+
+                    b.Property<string>("ArrivalTimestamp");
+
+                    b.Property<int>("ConferenceID");
+
+                    b.Property<string>("DepartureTimestamp");
+
+                    b.Property<string>("ExtraNote");
+
+                    b.Property<bool>("ParkingSpace");
+
+                    b.Property<string>("Transportation");
+
+                    b.Property<string>("UID");
+
+                    b.HasKey("TravelID");
+
+                    b.HasIndex("ConferenceID");
+
+                    b.HasIndex("UID");
+
+                    b.ToTable("Travel");
+                });
+
             modelBuilder.Entity("WebApplication1.Models.User", b =>
                 {
                     b.Property<string>("UID")
@@ -525,6 +555,18 @@ namespace BuFaKAPI.Migrations
                     b.HasOne("WebApplication1.Models.User", "User")
                         .WithMany()
                         .HasForeignKey("UserUID");
+                });
+
+            modelBuilder.Entity("WebApplication1.Models.Travel", b =>
+                {
+                    b.HasOne("WebApplication1.Models.Conference", "Conference")
+                        .WithMany()
+                        .HasForeignKey("ConferenceID")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("WebApplication1.Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UID");
                 });
 
             modelBuilder.Entity("WebApplication1.Models.Workshop", b =>
