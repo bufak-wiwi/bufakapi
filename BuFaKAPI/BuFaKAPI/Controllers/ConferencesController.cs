@@ -18,6 +18,11 @@
         public bool WorkshopApplicationPhase { get; set; }
 
         public bool WorkshopSuggestionPhase { get; set; }
+
+        public string InformationTextConferenceApplication { get; set; }
+        public string InformationTextWorkshopSuggestion { get; set; }
+
+        public string LinkParticipantAgreement { get; set; }
     }
 
     [Route("api/[controller]")]
@@ -202,8 +207,16 @@
                 conf.ConferenceApplicationPhase = conferencephases.ConferenceApplicationPhase;
                 conf.WorkshopApplicationPhase = conferencephases.WorkshopApplicationPhase;
                 conf.WorkshopSuggestionPhase = conferencephases.WorkshopSuggestionPhase;
+                conf.InformationTextConferenceApplication = conferencephases.InformationTextConferenceApplication;
+                conf.InformationTextWorkshopSuggestion = conferencephases.InformationTextWorkshopSuggestion;
+                conf.LinkParticipantAgreement = conferencephases.LinkParticipantAgreement;
 
                 this._context.Entry(conf).State = EntityState.Modified;
+
+                if (conferencephases.InformationTextWorkshopSuggestion.Contains("<script>") || conferencephases.InformationTextConferenceApplication.Contains("<script>"))
+                {
+                    return this.Unauthorized();
+                }
 
                 try
                 {

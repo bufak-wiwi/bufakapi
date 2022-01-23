@@ -14,7 +14,7 @@ namespace BuFaKAPI.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "2.1.11-servicing-32099")
+                .HasAnnotation("ProductVersion", "2.1.14-servicing-32113")
                 .HasAnnotation("Relational:MaxIdentifierLength", 64);
 
             modelBuilder.Entity("BuFaKAPI.Models.Administrator", b =>
@@ -237,11 +237,13 @@ namespace BuFaKAPI.Migrations
 
                     b.Property<bool>("IsOpen");
 
+                    b.Property<bool>("IsSecret");
+
                     b.Property<int>("MajorityID");
 
                     b.Property<string>("QuestionText");
 
-                    b.Property<DateTime>("ResolvedOn");
+                    b.Property<DateTime?>("ResolvedOn");
 
                     b.Property<int>("SumAbstention");
 
@@ -295,7 +297,13 @@ namespace BuFaKAPI.Migrations
 
                     b.Property<string>("DateStart");
 
+                    b.Property<string>("InformationTextConferenceApplication");
+
+                    b.Property<string>("InformationTextWorkshopSuggestion");
+
                     b.Property<bool>("Invalid");
+
+                    b.Property<string>("LinkParticipantAgreement");
 
                     b.Property<string>("Name");
 
