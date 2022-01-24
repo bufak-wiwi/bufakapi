@@ -12,15 +12,9 @@
         [Key]
         public int TravelID { get; set; }
 
-        [ForeignKey("ConferenceID")]
         public int ConferenceID { get; set; }
 
-       // public Conference Conference { get; set; }
-
-        [ForeignKey("UID")]
         public string UID { get; set; }
-
-        //public User User { get; set; }
 
         public string Transportation { get; set; }
 

@@ -406,10 +406,6 @@ namespace BuFaKAPI.Migrations
 
                     b.HasKey("TravelID");
 
-                    b.HasIndex("ConferenceID");
-
-                    b.HasIndex("UID");
-
                     b.ToTable("Travel");
                 });
 
@@ -555,18 +551,6 @@ namespace BuFaKAPI.Migrations
                     b.HasOne("WebApplication1.Models.User", "User")
                         .WithMany()
                         .HasForeignKey("UserUID");
-                });
-
-            modelBuilder.Entity("WebApplication1.Models.Travel", b =>
-                {
-                    b.HasOne("WebApplication1.Models.Conference", "Conference")
-                        .WithMany()
-                        .HasForeignKey("ConferenceID")
-                        .OnDelete(DeleteBehavior.Cascade);
-
-                    b.HasOne("WebApplication1.Models.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UID");
                 });
 
             modelBuilder.Entity("WebApplication1.Models.Workshop", b =>
