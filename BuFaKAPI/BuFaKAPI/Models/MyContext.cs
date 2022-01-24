@@ -54,5 +54,7 @@ namespace BuFaKAPI.Models
         public DbSet<BuFaKAPI.Models.VotingAnswer> VotingAnswer { get; set; }
 
         public DbSet<BuFaKAPI.Models.VotingMajority> VotingMajority { get; set; }
+
+        public DbSet<WebApplication1.Models.Travel> Travel { get; set; }
     }
 }
