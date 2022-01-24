@@ -42,6 +42,10 @@ namespace WebApplication1.Models
 
         public string LinkParticipantAgreement { get; set; }
 
+        public string WorkshopDurations { get; set; }
+
+        public string WorkshopTopics { get; set; }
+
         public string AddFields { get; set; }
     }
 }

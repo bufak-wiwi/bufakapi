@@ -20,9 +20,16 @@
         public bool WorkshopSuggestionPhase { get; set; }
 
         public string InformationTextConferenceApplication { get; set; }
+
         public string InformationTextWorkshopSuggestion { get; set; }
 
         public string LinkParticipantAgreement { get; set; }
+
+        public string WorkshopDurations { get; set; }
+
+        public string WorkshopTopics { get; set; }
+
+
     }
 
     [Route("api/[controller]")]
@@ -210,6 +217,8 @@
                 conf.InformationTextConferenceApplication = conferencephases.InformationTextConferenceApplication;
                 conf.InformationTextWorkshopSuggestion = conferencephases.InformationTextWorkshopSuggestion;
                 conf.LinkParticipantAgreement = conferencephases.LinkParticipantAgreement;
+                conf.WorkshopDurations = conferencephases.WorkshopDurations;
+                conf.WorkshopTopics = conferencephases.WorkshopTopics;
 
                 this._context.Entry(conf).State = EntityState.Modified;
 

@@ -309,7 +309,11 @@ namespace BuFaKAPI.Migrations
 
                     b.Property<bool>("WorkshopApplicationPhase");
 
+                    b.Property<string>("WorkshopDurations");
+
                     b.Property<bool>("WorkshopSuggestionPhase");
+
+                    b.Property<string>("WorkshopTopics");
 
                     b.HasKey("ConferenceID");
 
@@ -473,6 +477,8 @@ namespace BuFaKAPI.Migrations
                     b.Property<string>("Place");
 
                     b.Property<string>("Start");
+
+                    b.Property<string>("Topic");
 
                     b.Property<string>("UserUID");
 

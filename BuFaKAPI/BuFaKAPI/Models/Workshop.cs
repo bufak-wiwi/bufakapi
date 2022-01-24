@@ -43,5 +43,7 @@
         public string MaterialNote { get; set; }
 
         public bool Invalid { get; set; }
+
+        public string Topic { get; set; }
     }
 }
