@@ -29,6 +29,7 @@
 
         public string WorkshopTopics { get; set; }
 
+        public string TravelArrivalPlaces { get; set; }
 
     }
 
@@ -219,6 +220,8 @@
                 conf.LinkParticipantAgreement = conferencephases.LinkParticipantAgreement;
                 conf.WorkshopDurations = conferencephases.WorkshopDurations;
                 conf.WorkshopTopics = conferencephases.WorkshopTopics;
+                conf.TravelArrivalPlaces = conferencephases.TravelArrivalPlaces;
+
 
                 this._context.Entry(conf).State = EntityState.Modified;
 
