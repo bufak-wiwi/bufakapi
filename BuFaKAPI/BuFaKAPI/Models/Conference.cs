@@ -48,6 +48,8 @@ namespace WebApplication1.Models
 
         public string TravelArrivalPlaces { get; set; }
 
+        public string TravelTransportation { get; set; }
+
         public string AddFields { get; set; }
     }
 }

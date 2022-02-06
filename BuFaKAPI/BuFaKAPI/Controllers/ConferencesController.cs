@@ -225,7 +225,7 @@
 
                 this._context.Entry(conf).State = EntityState.Modified;
 
-                if (conferencephases.InformationTextWorkshopSuggestion.Contains("<script>") || conferencephases.InformationTextConferenceApplication.Contains("<script>"))
+                if (!(conferencephases.InformationTextWorkshopSuggestion is null) && (conferencephases.InformationTextWorkshopSuggestion.Contains("<script>") || conferencephases.InformationTextConferenceApplication.Contains("<script>")))
                 {
                     return this.Unauthorized();
                 }

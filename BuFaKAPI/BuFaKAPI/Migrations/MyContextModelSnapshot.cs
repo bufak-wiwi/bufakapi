@@ -309,6 +309,8 @@ namespace BuFaKAPI.Migrations
 
                     b.Property<string>("TravelArrivalPlaces");
 
+                    b.Property<string>("TravelTransportation");
+
                     b.Property<bool>("WorkshopApplicationPhase");
 
                     b.Property<string>("WorkshopDurations");
