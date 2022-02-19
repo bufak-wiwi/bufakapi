@@ -30,7 +30,10 @@
         public string WorkshopTopics { get; set; }
 
         public string TravelArrivalPlaces { get; set; }
+
         public string TravelTransportation { get; set; }
+
+        public string WorkshopParticipants { get; set; }
     }
 
     [Route("api/[controller]")]
@@ -222,6 +225,7 @@
                 conf.WorkshopTopics = conferencephases.WorkshopTopics;
                 conf.TravelArrivalPlaces = conferencephases.TravelArrivalPlaces;
                 conf.TravelTransportation = conferencephases.TravelTransportation;
+                conf.WorkshopParticipants = conferencephases.WorkshopParticipants;
 
 
                 this._context.Entry(conf).State = EntityState.Modified;

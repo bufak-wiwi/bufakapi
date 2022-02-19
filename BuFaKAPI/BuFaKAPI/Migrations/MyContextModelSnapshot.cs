@@ -315,6 +315,8 @@ namespace BuFaKAPI.Migrations
 
                     b.Property<string>("WorkshopDurations");
 
+                    b.Property<string>("WorkshopParticipants");
+
                     b.Property<bool>("WorkshopSuggestionPhase");
 
                     b.Property<string>("WorkshopTopics");

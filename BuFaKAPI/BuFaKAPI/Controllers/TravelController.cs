@@ -107,6 +107,37 @@
             return this.Unauthorized();
         }
 
+        /// <summary>
+        /// Gets the travel informations for a conference
+        /// </summary>
+        /// <param name="conference_id">ID of the conference to restrict the Search to</param>
+        /// <param name="jwttoken">User Token for Auth</param>
+        /// <param name="apikey">API Key for Authentification</param>
+        /// <returns>An Object with Flags, indicating the Conference application and the Workshop application</returns>
+        [HttpGet("forconference")]
+        public IActionResult GetTravel_Infos_For_Conference(
+            [FromHeader(Name = "conference_id")] int conference_id,
+            [FromHeader(Name = "jwttoken")] string jwttoken,
+            [FromQuery] string apikey)
+        {
+            // Permission Level User
+            if (this.jwtService.PermissionLevelValid(jwttoken, "admin") && this.auth.KeyIsValid(apikey, conference_id))
+            {
+                var travel = this._context.Travel.FromSql($"SELECT Travel.TravelID,User.Name,User.Surname,Travel.Transportation,Travel.ParkingSpace,Travel.ArrivalTimestamp,Travel.ArrivalPlace,Travel.DepartureTimestamp,Travel.ExtraNote,Travel.ConferenceID,Travel.UID from Travel INNER JOIN User ON Travel.UID = User.UID where Travel.ConferenceID = {conference_id}").ToList();
+                Console.WriteLine("-------------------");
+                Console.WriteLine(travel);
+                Console.WriteLine("-----------------------");
+                if (travel == null)
+                {
+                    return this.NotFound();
+                }
+
+                return this.Ok(travel);
+            }
+
+            return this.Unauthorized();
+        }
+
 
 
         private bool WorkshopExists(int id)
