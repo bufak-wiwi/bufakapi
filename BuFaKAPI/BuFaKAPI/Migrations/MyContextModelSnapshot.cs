@@ -14,7 +14,7 @@ namespace BuFaKAPI.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "2.1.11-servicing-32099")
+                .HasAnnotation("ProductVersion", "2.1.14-servicing-32113")
                 .HasAnnotation("Relational:MaxIdentifierLength", 64);
 
             modelBuilder.Entity("BuFaKAPI.Models.Administrator", b =>
@@ -237,11 +237,13 @@ namespace BuFaKAPI.Migrations
 
                     b.Property<bool>("IsOpen");
 
+                    b.Property<bool>("IsSecret");
+
                     b.Property<int>("MajorityID");
 
                     b.Property<string>("QuestionText");
 
-                    b.Property<DateTime>("ResolvedOn");
+                    b.Property<DateTime?>("ResolvedOn");
 
                     b.Property<int>("SumAbstention");
 
@@ -295,13 +297,27 @@ namespace BuFaKAPI.Migrations
 
                     b.Property<string>("DateStart");
 
+                    b.Property<string>("InformationTextConferenceApplication");
+
+                    b.Property<string>("InformationTextWorkshopSuggestion");
+
                     b.Property<bool>("Invalid");
+
+                    b.Property<string>("LinkParticipantAgreement");
 
                     b.Property<string>("Name");
 
+                    b.Property<string>("TravelArrivalPlaces");
+
+                    b.Property<string>("TravelTransportation");
+
                     b.Property<bool>("WorkshopApplicationPhase");
 
+                    b.Property<string>("WorkshopDurations");
+
                     b.Property<bool>("WorkshopSuggestionPhase");
+
+                    b.Property<string>("WorkshopTopics");
 
                     b.HasKey("ConferenceID");
 
@@ -375,6 +391,32 @@ namespace BuFaKAPI.Migrations
                     b.ToTable("Council");
                 });
 
+            modelBuilder.Entity("WebApplication1.Models.Travel", b =>
+                {
+                    b.Property<int>("TravelID")
+                        .ValueGeneratedOnAdd();
+
+                    b.Property<string>("ArrivalPlace");
+
+                    b.Property<string>("ArrivalTimestamp");
+
+                    b.Property<int>("ConferenceID");
+
+                    b.Property<string>("DepartureTimestamp");
+
+                    b.Property<string>("ExtraNote");
+
+                    b.Property<bool>("ParkingSpace");
+
+                    b.Property<string>("Transportation");
+
+                    b.Property<string>("UID");
+
+                    b.HasKey("TravelID");
+
+                    b.ToTable("Travel");
+                });
+
             modelBuilder.Entity("WebApplication1.Models.User", b =>
                 {
                     b.Property<string>("UID")
@@ -439,6 +481,8 @@ namespace BuFaKAPI.Migrations
                     b.Property<string>("Place");
 
                     b.Property<string>("Start");
+
+                    b.Property<string>("Topic");
 
                     b.Property<string>("UserUID");
 

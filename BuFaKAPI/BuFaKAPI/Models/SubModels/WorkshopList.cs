@@ -25,6 +25,6 @@
         public string MaterialNote { get; set; }
 
         public int Applicants { get; set; }
-
+        public string Topic { get;  set; }
     }
 }

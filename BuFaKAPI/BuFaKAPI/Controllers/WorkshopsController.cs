@@ -61,6 +61,7 @@
                         MaxVisitors = ws.MaxVisitors,
                         MaterialNote = ws.MaterialNote,
                         Overview = ws.Overview,
+                        Topic = ws.Topic,
                         Applicants = this._context.Workshop_Application.Where(wa => wa.WorkshopID == ws.WorkshopID && wa.Status == "IsAttendee").ToList().Count
                     };
                     wsexport.Add(wsexportitem);

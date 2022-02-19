@@ -18,6 +18,19 @@
         public bool WorkshopApplicationPhase { get; set; }
 
         public bool WorkshopSuggestionPhase { get; set; }
+
+        public string InformationTextConferenceApplication { get; set; }
+
+        public string InformationTextWorkshopSuggestion { get; set; }
+
+        public string LinkParticipantAgreement { get; set; }
+
+        public string WorkshopDurations { get; set; }
+
+        public string WorkshopTopics { get; set; }
+
+        public string TravelArrivalPlaces { get; set; }
+        public string TravelTransportation { get; set; }
     }
 
     [Route("api/[controller]")]
@@ -202,8 +215,21 @@
                 conf.ConferenceApplicationPhase = conferencephases.ConferenceApplicationPhase;
                 conf.WorkshopApplicationPhase = conferencephases.WorkshopApplicationPhase;
                 conf.WorkshopSuggestionPhase = conferencephases.WorkshopSuggestionPhase;
+                conf.InformationTextConferenceApplication = conferencephases.InformationTextConferenceApplication;
+                conf.InformationTextWorkshopSuggestion = conferencephases.InformationTextWorkshopSuggestion;
+                conf.LinkParticipantAgreement = conferencephases.LinkParticipantAgreement;
+                conf.WorkshopDurations = conferencephases.WorkshopDurations;
+                conf.WorkshopTopics = conferencephases.WorkshopTopics;
+                conf.TravelArrivalPlaces = conferencephases.TravelArrivalPlaces;
+                conf.TravelTransportation = conferencephases.TravelTransportation;
+
 
                 this._context.Entry(conf).State = EntityState.Modified;
+
+                if (!(conferencephases.InformationTextWorkshopSuggestion is null) && (conferencephases.InformationTextWorkshopSuggestion.Contains("<script>") || conferencephases.InformationTextConferenceApplication.Contains("<script>")))
+                {
+                    return this.Unauthorized();
+                }
 
                 try
                 {

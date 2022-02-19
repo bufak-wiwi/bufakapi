@@ -36,6 +36,20 @@ namespace WebApplication1.Models
 
         public string AlumnusCost { get; set; }
 
+        public string InformationTextConferenceApplication { get; set; }
+
+        public string InformationTextWorkshopSuggestion { get; set; }
+
+        public string LinkParticipantAgreement { get; set; }
+
+        public string WorkshopDurations { get; set; }
+
+        public string WorkshopTopics { get; set; }
+
+        public string TravelArrivalPlaces { get; set; }
+
+        public string TravelTransportation { get; set; }
+
         public string AddFields { get; set; }
     }
 }
