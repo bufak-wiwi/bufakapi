@@ -172,6 +172,7 @@ namespace BuFaKAPI.Controllers
                         IsAlumnus = ca.IsAlumnus,
                         IsHelper = ca.IsHelper,
                         IsBuFaKCouncil = ca.IsBuFaKCouncil,
+                        IsAllowedToVote = ca.IsAllowedToVote,
                     };
                     lufc.Add(ufc);
                 }

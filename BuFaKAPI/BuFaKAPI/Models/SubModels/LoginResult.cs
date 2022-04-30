@@ -25,6 +25,8 @@
         public bool IsAlumnus { get; set; }
 
         public bool IsBuFaKCouncil { get; set; }
+
+        public bool IsAllowedToVote { get; set; }
     }
 
     public class LoginResult

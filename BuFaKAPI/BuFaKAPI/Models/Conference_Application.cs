@@ -91,5 +91,10 @@
         /// Gets or sets a value indicating whether the dataset is invalid or not
         /// </summary>
         public bool Invalid { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether the Applicant is of the BuFaK Council or not
+        /// </summary>
+        public bool IsAllowedToVote { get; set; }
     }
 }
