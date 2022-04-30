@@ -336,6 +336,8 @@ namespace BuFaKAPI.Migrations
 
                     b.Property<bool>("Invalid");
 
+                    b.Property<bool>("IsAllowedToVote");
+
                     b.Property<bool>("IsAlumnus");
 
                     b.Property<bool>("IsBuFaKCouncil");
