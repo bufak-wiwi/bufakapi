@@ -28,6 +28,8 @@
 
         public string ExtraNote { get; set; }
 
+        public string Deutschlandticket { get; set; }
+
 
     }
 }
