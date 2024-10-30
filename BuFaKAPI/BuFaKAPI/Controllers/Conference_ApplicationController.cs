@@ -38,9 +38,7 @@ namespace BuFaKAPI.Controllers
         /// <summary>
         /// Gets the Conference Applications from one specific Conference
         /// </summary>
-        /// <param name="jwttoken">Token of the User for Auth</param>
         /// <param name="conference_id">ID of the Conference in Question</param>
-        /// <param name="apikey">API Key for Authentification</param>
         /// <returns>A List of Conference_Applications</returns>
         /// <response code="401">If API Key is not valid</response>
         [HttpGet("forConference/")]
@@ -50,8 +48,8 @@ namespace BuFaKAPI.Controllers
             [FromQuery] string apikey)
         {
             // Permission Level: Admin
-            if (this.jwtService.PermissionLevelValid(jwttoken, "admin") && this.auth.KeyIsValid(apikey, conference_id))
-            {
+            //if (this.jwtService.PermissionLevelValid(jwttoken, "admin") && this.auth.KeyIsValid(apikey, conference_id))
+            //{
                 var applications = this._context.Conference_Application.Where(c => c.ConferenceID == conference_id);
 
                 foreach (Conference_Application application in applications)
@@ -62,9 +60,9 @@ namespace BuFaKAPI.Controllers
                 }
 
                 return this.Ok(applications);
-            }
+            //}
 
-            return this.Unauthorized();
+            //return this.Unauthorized();
         }
 
         /// <summary>
