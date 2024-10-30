@@ -26,6 +26,7 @@
         [ForeignKey("Applicant_uid")]
         public string ApplicantUID { get; set; }
 
+        public Travel Travel { get; set; }
         /// <summary>
         /// Gets or sets the User-Object of the Applicant
         /// </summary>

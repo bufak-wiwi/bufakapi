@@ -58,6 +58,7 @@ namespace BuFaKAPI.Controllers
                 {
                     application.Sensible = this._context.Sensible.Find(application.SensibleID);
                     application.User = this._context.User.Find(application.ApplicantUID);
+                    application.Travel = this._context.Travel.Find(application.ApplicantUID);
                 }
 
                 return this.Ok(applications);
